@@ -115,6 +115,17 @@
   }
   .price-tag .label { color: rgba(255,255,255,0.75); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
   .price-tag .value { color: var(--yellow); font-size: 30px; font-weight: 800; font-family: 'Baloo 2', cursive; line-height: 1.1; }
+  /* Nova linha para a chave PIX abaixo do valor */
+  .price-tag .pix-chave {
+    color: #fff;
+    font-size: 12px;
+    margin-top: 5px;
+    font-weight: 500;
+    background: rgba(0,0,0,0.3);
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-block;
+  }
   .live-bar {
     background: var(--dark);
     padding: 8px 20px;
@@ -133,8 +144,15 @@
     50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(46,204,113,0); }
   }
   .live-dot.offline { background: var(--red-light); animation: none; }
+  /* Stats e progresso inicialmente ocultos */
+  .stats-bar, .progress-row {
+    display: none;
+  }
+  .stats-bar.visible, .progress-row.visible {
+    display: flex;
+  }
   .stats-bar {
-    display: flex; align-items: center; justify-content: center; gap: 0;
+    align-items: center; justify-content: center; gap: 0;
     padding: 0; background: #fff;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   }
@@ -158,7 +176,7 @@
   .stat-divider { width: 1px; height: 40px; background: #eee; }
   .progress-row {
     padding: 14px 20px;
-    display: flex; align-items: center; gap: 12px;
+    align-items: center; gap: 12px;
     background: #fff;
     border-bottom: 1px solid #f0f0f0;
   }
@@ -312,7 +330,7 @@
   .footer p { margin: 0 0 6px; }
   .footer .f1 { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; }
   .footer .f2 { color: var(--yellow); font-size: 14px; font-weight: 700; }
-  .footer .f3 { color: rgba(255,255,255,0.6); font-size: 12px; margin: 0; }
+  /* Linha do PIX removida do footer */
   .overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.55);
@@ -434,13 +452,15 @@
     <div class="price-tag">
       <span class="label">Valor do numero</span>
       <span class="value">R$ 20</span>
+      <span class="pix-chave" id="pix-header"></span>
     </div>
   </div>
   <div class="live-bar">
     <div class="live-dot" id="live-dot"></div>
     <span id="live-text">Conectado - dados em tempo real</span>
   </div>
-  <div class="stats-bar">
+  <!-- Barra de estatísticas (inicialmente oculta) -->
+  <div class="stats-bar" id="stats-bar">
     <div class="stat-item">
       <span class="stat-number" id="stat-available">100</span>
       <span class="stat-label">Disponiveis</span>
@@ -456,7 +476,8 @@
       <span class="stat-label">Total</span>
     </div>
   </div>
-  <div class="progress-row">
+  <!-- Barra de progresso (inicialmente oculta) -->
+  <div class="progress-row" id="progress-row">
     <div class="progress-bg"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
     <span class="progress-text" id="progress-text">0% vendido</span>
   </div>
@@ -490,7 +511,7 @@
   <div class="footer">
     <p class="f1">Sorteio pela Loteria Federal - Dois ultimos numeros do 1o premio</p>
     <p class="f2">WhatsApp: (51) 92000-1595 - Alexandre (Guarda-Chuva)</p>
-    <p class="f3" id="pix2">PIX: cspconlutas.rs</p>
+    <!-- Linha do PIX removida -->
   </div>
 </div>
 
@@ -541,7 +562,6 @@
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2Z21hYmJkZ255bXJ6cXBxeXd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUzMzMsImV4cCI6MjA4ODk0MTMzM30.t5EjBugUEErc4cbLRVuwqBnt6JbZ_ow8t2ARWVbTcWQ';
 
   // Configuração do EmailJS (substitua pelas suas credenciais)
-  // Cadastre-se em https://www.emailjs.com/ e crie um serviço e templates
   var EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY'; // Substitua
   var EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID'; // Substitua
   var EMAILJS_TEMPLATE_LOG = 'YOUR_TEMPLATE_ID_FOR_LOG'; // Template para o log
@@ -552,8 +572,10 @@
 
   // Email PIX (montado via JS para evitar filtros)
   var PIX_EMAIL = 'cspconlutas.rs' + '@' + 'gmail.com';
+  // Colocar a chave PIX no header (abaixo do valor)
+  document.getElementById('pix-header').textContent = 'PIX: ' + PIX_EMAIL;
+  // Manter no modal
   document.getElementById('pix1').textContent = PIX_EMAIL;
-  document.getElementById('pix2').textContent = 'PIX: ' + PIX_EMAIL;
   document.getElementById('modal-note-text').innerHTML =
     'Apos confirmar, efetue o pagamento de <strong>R$20</strong> via PIX para <strong>' +
     PIX_EMAIL + '</strong> e envie o comprovante pelo WhatsApp.';
@@ -568,7 +590,7 @@
   var selectedNumber = null;
   var logOpen = false;
   var infoOpen = false;
-  var adminVisible = false; // controle dos botões administrativos
+  var adminVisible = false; // controle dos botões administrativos e das estatísticas
 
   function escHTML(s) {
     var d = document.createElement('div');
@@ -683,7 +705,7 @@
     var elTotal = document.getElementById('stat-total');
     elAvail.textContent = available;
     elTaken.textContent = takenCount;
-    elTotal.textContent = TOTAL; // garantia
+    elTotal.textContent = TOTAL;
     if (animate) {
       elAvail.classList.remove('bump');
       elTaken.classList.remove('bump');
@@ -932,7 +954,7 @@
     toastTimer = setTimeout(function() { toast.classList.remove('show', 'error'); }, 4500);
   }
 
-  // Função para alternar visibilidade dos botões administrativos
+  // Função para alternar visibilidade dos botões administrativos e das estatísticas
   function toggleAdmin() {
     var senha = prompt('Digite a senha de admin:');
     if (senha === '9871') {
@@ -940,12 +962,22 @@
       var btnLog = document.getElementById('btn-log');
       var btnReset = document.getElementById('btn-reset');
       var btnDownload = document.getElementById('btn-download');
+      var statsBar = document.getElementById('stats-bar');
+      var progressRow = document.getElementById('progress-row');
+
       btnLog.style.display = adminVisible ? 'block' : 'none';
       btnReset.style.display = adminVisible ? 'block' : 'none';
       btnDownload.style.display = adminVisible ? 'block' : 'none';
-      if (!adminVisible && logOpen) {
-        // Opcional: fechar o log se estiver aberto
-        // toggleLog(); // descomente se quiser fechar automaticamente
+
+      // Mostra/esconde as barras de estatísticas
+      if (adminVisible) {
+        statsBar.classList.add('visible');
+        progressRow.classList.add('visible');
+      } else {
+        statsBar.classList.remove('visible');
+        progressRow.classList.remove('visible');
+        // Se ocultar, também fecha o log se estiver aberto (opcional)
+        if (logOpen) toggleLog();
       }
     } else if (senha !== null) {
       alert('Senha incorreta.');
