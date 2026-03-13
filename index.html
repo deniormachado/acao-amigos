@@ -465,8 +465,7 @@
 <script>
   // ▼▼▼ COLE AQUI A URL E A CHAVE DO SEU PROJETO SUPABASE ▼▼▼
   const SUPABASE_URL  = 'https://lvgmabbdgnymrzqpqywy.supabase.co';       // ex: https://xyzabc.supabase.co
-  const SUPABASE_KEY  = 'sb_publishable_To5nNYzjSZUPJ47_yYzngw_g7J_fFaG';  // chave pública (anon)
-  // ▲▲▲ ─────────────────────────────────────────────────── ▲▲▲
+  const SUPABASE_KEY  = 'sb_publishable_To5nNYzjSZUPJ47_yYzngw_g7J_fFaG';  // chave pública (anon)// ▲▲▲ ─────────────────────────────────────────────────── ▲▲▲
 </script>
 
 <!-- Loading screen -->
@@ -522,7 +521,7 @@
   <div class="info-box" id="info-box">
     <div class="info-step"><span class="step-num">1</span> Escolha um número disponível (azul)</div>
     <div class="info-step"><span class="step-num">2</span> Preencha seu nome e quem ofereceu</div>
-    <div class="info-step"><span class="step-num">3</span> Pague via PIX: <strong>cspconlutas.rs@gmail.com</strong></div>
+    <div class="info-step"><span class="step-num">3</span> Pague via PIX: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c8abbbb8aba7a6a4bdbca9bbe6babb88afa5a9a1a4e6aba7a5">[email&#160;protected]</a></strong></div>
     <div class="info-step"><span class="step-num">4</span> Envie o comprovante para confirmar</div>
     <div class="info-step"><span class="step-num">5</span> Aguarde o sorteio pela Loteria Federal</div>
     <p class="info-note">Serão considerados os dois últimos números do 1º prêmio.</p>
@@ -555,7 +554,7 @@
   <div class="footer">
     <p class="f1">Sorteio pela Loteria Federal — Dois últimos números do 1º prêmio</p>
     <p class="f2">WhatsApp: (51) 92000-1595 — Alexandre (Guarda-Chuva)</p>
-    <p class="f3">PIX: cspconlutas.rs@gmail.com</p>
+    <p class="f3">PIX: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="95f6e6e5f6fafbf9e0e1f4e6bbe7e6d5f2f8f4fcf9bbf6faf8">[email&#160;protected]</a></p>
   </div>
 </div>
 
@@ -586,7 +585,7 @@
       </div>
       <p class="modal-note">
         Após confirmar, efetue o pagamento de <strong>R$20</strong> via PIX para
-        <strong>cspconlutas.rs@gmail.com</strong> e envie o comprovante pelo WhatsApp.
+        <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d8bbaba8bbb7b6b4adacb9abf6aaab98bfb5b9b1b4f6bbb7b5">[email&#160;protected]</a></strong> e envie o comprovante pelo WhatsApp.
       </p>
       <button class="confirm-btn" id="confirm-btn" onclick="confirmChoice()" disabled>
         Confirmar Número
@@ -604,9 +603,9 @@
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // ── Supabase client ──
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // ── State ──
   const TOTAL = 101;
@@ -620,7 +619,7 @@
   async function init() {
     try {
       // Load all chosen numbers
-      const { data: escolhas, error: e1 } = await supabase
+      const { data: escolhas, error: e1 } = await db
         .from('escolhas')
         .select('*');
       if (e1) throw e1;
@@ -635,7 +634,7 @@
       });
 
       // Load log
-      const { data: logRows, error: e2 } = await supabase
+      const { data: logRows, error: e2 } = await db
         .from('log_escolhas')
         .select('*')
         .order('created_at', { ascending: true });
@@ -668,7 +667,7 @@
 
   // ── Realtime subscription ──
   function subscribeRealtime() {
-    supabase
+    db
       .channel('escolhas-changes')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'escolhas' }, (payload) => {
         const row = payload.new;
@@ -815,7 +814,7 @@
 
     try {
       // Insert into escolhas (will fail if duplicate due to PRIMARY KEY)
-      const { error: e1 } = await supabase
+      const { error: e1 } = await db
         .from('escolhas')
         .insert({ numero, nome, ofereceu });
 
@@ -833,7 +832,7 @@
       }
 
       // Insert into log
-      await supabase.from('log_escolhas').insert({
+      await db.from('log_escolhas').insert({
         numero,
         nome,
         ofereceu,
@@ -921,8 +920,8 @@
     if (!confirm('ATENÇÃO: Isso vai apagar TODOS os números escolhidos.\nEsta ação NÃO pode ser desfeita.\n\nConfirmar reset?')) return;
 
     try {
-      await supabase.from('log_escolhas').delete().gte('id', 0);
-      await supabase.from('escolhas').delete().gte('numero', 0);
+      await db.from('log_escolhas').delete().gte('id', 0);
+      await db.from('escolhas').delete().gte('numero', 0);
       taken = {};
       logData = [];
       renderGrid();
@@ -948,19 +947,4 @@
   function showToast(title, sub, isError) {
     clearTimeout(toastTimer);
     const toast = document.getElementById('toast');
-    document.getElementById('toast-title').textContent = title;
-    document.getElementById('toast-sub').textContent = sub;
-    document.getElementById('toast-icon').textContent = isError ? '✕' : '✓';
-    toast.classList.remove('show', 'error');
-    void toast.offsetWidth;
-    toast.classList.add('show');
-    if (isError) toast.classList.add('error');
-    toastTimer = setTimeout(() => toast.classList.remove('show', 'error'), 4500);
-  }
-
-  // ── Start ──
-  init();
-</script>
-
-</body>
-</html>
+    document.getEl
