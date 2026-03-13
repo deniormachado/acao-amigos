@@ -3,21 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ação entre Amig@s — CSP-Conlutas RS</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧉</text></svg>">
+<title>Acao entre Amigos - CSP-Conlutas RS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  /* ╔═══════════════════════════════════════════════════════╗
-     ║  AÇÃO ENTRE AMIG@S — Estilos                        ║
-     ╚═══════════════════════════════════════════════════════╝ */
-
   :root {
     --red: #c0392b;
     --red-light: #e74c3c;
     --yellow: #f1c40f;
-    --yellow-dark: #d4ac0d;
     --blue: #2980b9;
     --blue-light: #3498db;
     --green: #27ae60;
@@ -26,16 +20,13 @@
     --gray: #95a5a6;
     --gray-light: #bdc3c7;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     font-family: 'DM Sans', 'Segoe UI', sans-serif;
     background: #e8e4e0;
     color: #333;
     -webkit-tap-highlight-color: transparent;
   }
-
   .page {
     max-width: 620px;
     margin: 0 auto;
@@ -44,8 +35,6 @@
     position: relative;
     box-shadow: 0 0 60px rgba(0,0,0,0.1);
   }
-
-  /* ── Loading ── */
   .loading-screen {
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -61,7 +50,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-screen p { color: #fff; margin-top: 16px; font-weight: 600; font-size: 15px; }
-
   .error-banner {
     background: #fdecea; color: var(--red);
     padding: 14px 20px; text-align: center;
@@ -70,8 +58,6 @@
     display: none;
   }
   .error-banner.show { display: block; }
-
-  /* ── Header ── */
   .header {
     background: linear-gradient(150deg, #b83224 0%, var(--red-light) 40%, var(--red) 100%);
     padding: 36px 24px 30px;
@@ -84,11 +70,9 @@
     position: absolute; inset: 0;
     background:
       radial-gradient(ellipse at 15% 85%, rgba(241,196,15,0.12) 0%, transparent 50%),
-      radial-gradient(ellipse at 85% 15%, rgba(241,196,15,0.08) 0%, transparent 50%),
-      repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 40px);
+      radial-gradient(ellipse at 85% 15%, rgba(241,196,15,0.08) 0%, transparent 50%);
   }
   .header > * { position: relative; z-index: 1; }
-
   .badge {
     display: inline-block;
     background: var(--yellow);
@@ -129,8 +113,6 @@
   }
   .price-tag .label { color: rgba(255,255,255,0.75); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
   .price-tag .value { color: var(--yellow); font-size: 30px; font-weight: 800; font-family: 'Baloo 2', cursive; line-height: 1.1; }
-
-  /* ── Live indicator ── */
   .live-bar {
     background: var(--dark);
     padding: 8px 20px;
@@ -149,8 +131,6 @@
     50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(46,204,113,0); }
   }
   .live-dot.offline { background: var(--red-light); animation: none; }
-
-  /* ── Stats ── */
   .stats-bar {
     display: flex; align-items: center; justify-content: center; gap: 0;
     padding: 0; background: #fff;
@@ -174,8 +154,6 @@
   }
   .stat-label { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 3px; font-weight: 600; }
   .stat-divider { width: 1px; height: 40px; background: #eee; }
-
-  /* ── Progress ── */
   .progress-row {
     padding: 14px 20px;
     display: flex; align-items: center; gap: 12px;
@@ -192,8 +170,6 @@
   }
   @keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
   .progress-text { font-size: 13px; color: #888; font-weight: 700; min-width: 78px; text-align: right; }
-
-  /* ── Info ── */
   .info-toggle { padding: 10px 20px; background: #fff; border-bottom: 1px solid #f0f0f0; }
   .info-toggle button {
     background: none; border: none;
@@ -218,8 +194,6 @@
   }
   .info-note { font-size: 13px; color: var(--red); font-weight: 700; margin-top: 14px; }
   .info-contact { font-size: 13px; color: #666; margin-top: 4px; }
-
-  /* ── Legend ── */
   .legend {
     display: flex; justify-content: center; gap: 28px;
     padding: 14px 20px; background: #f7f6f4;
@@ -229,8 +203,6 @@
   .legend-dot.av { background: linear-gradient(135deg, var(--blue), var(--blue-light)); box-shadow: 0 2px 6px rgba(41,128,185,0.3); }
   .legend-dot.tk { background: linear-gradient(135deg, var(--gray), var(--gray-light)); box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); }
   .legend-text { font-size: 12px; color: #777; font-weight: 600; }
-
-  /* ── Grid ── */
   .grid {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
@@ -251,7 +223,6 @@
     animation: cellIn 0.35s ease forwards;
   }
   @keyframes cellIn { to { opacity: 1; transform: scale(1); } }
-
   .cell.available {
     background: linear-gradient(145deg, var(--blue), var(--blue-light));
     box-shadow: 0 2px 8px rgba(41,128,185,0.25);
@@ -263,7 +234,6 @@
     z-index: 2;
   }
   .cell.available:active { transform: scale(1.05) !important; }
-
   .cell.taken {
     background: linear-gradient(145deg, #aaa, #c4c4c4);
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.15);
@@ -277,17 +247,11 @@
     inset: 0; display: flex; align-items: center; justify-content: center;
     pointer-events: none;
   }
-
-  /* Just-taken animation */
-  .cell.just-taken {
-    animation: justTaken 0.6s ease;
-  }
+  .cell.just-taken { animation: justTaken 0.6s ease; }
   @keyframes justTaken {
     0% { transform: scale(1.2); background: var(--red-light); }
     100% { transform: scale(1); }
   }
-
-  /* ── Admin ── */
   .admin {
     display: flex; gap: 8px; padding: 16px;
     background: #fff; border-top: 1px solid #eee;
@@ -305,8 +269,6 @@
   .btn-log { background: var(--dark); }
   .btn-download { background: var(--green); }
   .btn-reset { background: var(--red); flex: 0; min-width: 100px; }
-
-  /* ── Log ── */
   .log-container {
     max-height: 0; overflow: hidden;
     transition: max-height 0.4s ease;
@@ -318,7 +280,6 @@
     background: #f8f7f5; border-radius: 10px;
     padding: 12px 14px; margin-bottom: 8px;
     border-left: 4px solid var(--red);
-    transition: background 0.15s;
   }
   .log-entry:hover { background: #f1f0ec; }
   .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
@@ -326,8 +287,6 @@
   .log-date { font-size: 11px; color: #999; }
   .log-body { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: #666; }
   .log-empty { text-align: center; color: #aaa; padding: 24px; font-style: italic; }
-
-  /* ── Footer ── */
   .footer {
     background: linear-gradient(150deg, var(--red), #a93226);
     padding: 24px 20px; text-align: center;
@@ -336,8 +295,6 @@
   .footer .f1 { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; }
   .footer .f2 { color: var(--yellow); font-size: 14px; font-weight: 700; }
   .footer .f3 { color: rgba(255,255,255,0.6); font-size: 12px; margin: 0; }
-
-  /* ── Modal ── */
   .overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.55);
@@ -364,7 +321,6 @@
     font-size: 16px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     z-index: 2; color: #333; font-weight: 700;
-    transition: background 0.15s;
   }
   .modal-close:hover { background: #fff; }
   .modal-header {
@@ -381,10 +337,7 @@
   .modal-header h2 { color: #fff; font-size: 18px; font-weight: 700; }
   .modal-body { padding: 24px; }
   .input-group { margin-bottom: 18px; }
-  .input-group label {
-    display: block; font-size: 13px;
-    font-weight: 700; color: #444; margin-bottom: 6px;
-  }
+  .input-group label { display: block; font-size: 13px; font-weight: 700; color: #444; margin-bottom: 6px; }
   .input-group input {
     width: 100%; padding: 13px 15px;
     border: 2px solid #e8e8e8; border-radius: 12px;
@@ -412,10 +365,8 @@
     box-shadow: 0 4px 15px rgba(39,174,96,0.3);
   }
   .confirm-btn:hover:not(:disabled) { filter: brightness(1.05); }
-  .confirm-btn:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+  .confirm-btn:disabled { opacity: 0.45; cursor: not-allowed; }
   .confirm-btn.loading { pointer-events: none; opacity: 0.6; }
-
-  /* ── Toast ── */
   .toast {
     position: fixed; bottom: 24px; left: 20px; right: 20px;
     background: linear-gradient(135deg, var(--green), var(--green-light));
@@ -445,7 +396,6 @@
   }
   .toast strong { display: block; font-size: 15px; }
   .toast .sub { font-size: 13px; opacity: 0.9; }
-
   @media (max-width: 420px) {
     .grid { gap: 3px; padding: 14px 8px; }
     .cell .num { font-size: 11px; }
@@ -457,45 +407,25 @@
 </head>
 <body>
 
-<!-- ╔═══════════════════════════════════════╗ -->
-<!-- ║  CONFIGURAÇÃO DO SUPABASE            ║ -->
-<!-- ║  Preencha as duas variáveis abaixo   ║ -->
-<!-- ╚═══════════════════════════════════════╝ -->
-
-<script>
-  // ▼▼▼ COLE AQUI A URL E A CHAVE DO SEU PROJETO SUPABASE ▼▼▼
-  const SUPABASE_URL  = 'https://lvgmabbdgnymrzqpqywy.supabase.co';
-  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2Z21hYmJkZ255bXJ6cXBxeXd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUzMzMsImV4cCI6MjA4ODk0MTMzM30.t5EjBugUEErc4cbLRVuwqBnt6JbZ_ow8t2ARWVbTcWQ';
-  // ▲▲▲ ─────────────────────────────────────────────────── ▲▲▲
-</script>
-
-<!-- Loading screen -->
 <div class="page" id="page" style="display:none;">
-
   <div class="error-banner" id="error-banner"></div>
-
-  <!-- Header -->
   <div class="header">
-    <div class="badge">AÇÃO ENTRE AMIG@S</div>
-    <h1>Kit Chimarrão<br>e Mateira</h1>
+    <div class="badge">ACAO ENTRE AMIG@S</div>
+    <h1>Kit Chimarrao<br>e Mateira</h1>
     <p class="subtitle">CSP-Conlutas RS</p>
     <div class="price-tag">
-      <span class="label">Valor do número</span>
+      <span class="label">Valor do numero</span>
       <span class="value">R$ 20</span>
     </div>
   </div>
-
-  <!-- Live indicator -->
   <div class="live-bar">
     <div class="live-dot" id="live-dot"></div>
-    <span id="live-text">Conectado — dados em tempo real</span>
+    <span id="live-text">Conectado - dados em tempo real</span>
   </div>
-
-  <!-- Stats -->
   <div class="stats-bar">
     <div class="stat-item">
       <span class="stat-number" id="stat-available">101</span>
-      <span class="stat-label">Disponíveis</span>
+      <span class="stat-label">Disponiveis</span>
     </div>
     <div class="stat-divider"></div>
     <div class="stat-item">
@@ -508,69 +438,53 @@
       <span class="stat-label">Total</span>
     </div>
   </div>
-
-  <!-- Progress -->
   <div class="progress-row">
     <div class="progress-bg"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
     <span class="progress-text" id="progress-text">0% vendido</span>
   </div>
-
-  <!-- Info -->
   <div class="info-toggle">
-    <button id="info-btn" onclick="toggleInfo()">▼ Como participar</button>
+    <button id="info-btn" onclick="toggleInfo()">Como participar</button>
   </div>
   <div class="info-box" id="info-box">
-    <div class="info-step"><span class="step-num">1</span> Escolha um número disponível (azul)</div>
+    <div class="info-step"><span class="step-num">1</span> Escolha um numero disponivel (azul)</div>
     <div class="info-step"><span class="step-num">2</span> Preencha seu nome e quem ofereceu</div>
-    <div class="info-step"><span class="step-num">3</span> Pague via PIX: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="63001013000c0d0f161702104d111023040e020a0f4d000c0e">[email&#160;protected]</a></strong></div>
+    <div class="info-step"><span class="step-num">3</span> Pague via PIX: <strong id="pix1">cspconlutas.rs</strong></div>
     <div class="info-step"><span class="step-num">4</span> Envie o comprovante para confirmar</div>
     <div class="info-step"><span class="step-num">5</span> Aguarde o sorteio pela Loteria Federal</div>
-    <p class="info-note">Serão considerados os dois últimos números do 1º prêmio.</p>
-    <p class="info-contact">WhatsApp: (51) 92000-1595 — Alexandre (Guarda-Chuva)</p>
+    <p class="info-note">Serao considerados os dois ultimos numeros do 1o premio.</p>
+    <p class="info-contact">WhatsApp: (51) 92000-1595 - Alexandre (Guarda-Chuva)</p>
   </div>
-
-  <!-- Legend -->
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot av"></div><span class="legend-text">Disponível</span></div>
+    <div class="legend-item"><div class="legend-dot av"></div><span class="legend-text">Disponivel</span></div>
     <div class="legend-item"><div class="legend-dot tk"></div><span class="legend-text">Escolhido</span></div>
   </div>
-
-  <!-- Grid -->
   <div class="grid" id="grid"></div>
-
-  <!-- Admin -->
   <div class="admin">
     <button class="btn-log" id="btn-log" onclick="toggleLog()">Ver Registros (0)</button>
-    <button class="btn-download" onclick="downloadLog()">⬇ Baixar Log</button>
+    <button class="btn-download" onclick="downloadLog()">Baixar Log</button>
     <button class="btn-reset" onclick="resetAll()">Resetar</button>
   </div>
-
-  <!-- Log -->
   <div class="log-container" id="log-container">
     <h3>Registros de Escolhas</h3>
     <div id="log-entries"></div>
   </div>
-
-  <!-- Footer -->
   <div class="footer">
-    <p class="f1">Sorteio pela Loteria Federal — Dois últimos números do 1º prêmio</p>
-    <p class="f2">WhatsApp: (51) 92000-1595 — Alexandre (Guarda-Chuva)</p>
-    <p class="f3">PIX: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="95f6e6e5f6fafbf9e0e1f4e6bbe7e6d5f2f8f4fcf9bbf6faf8">[email&#160;protected]</a></p>
+    <p class="f1">Sorteio pela Loteria Federal - Dois ultimos numeros do 1o premio</p>
+    <p class="f2">WhatsApp: (51) 92000-1595 - Alexandre (Guarda-Chuva)</p>
+    <p class="f3" id="pix2">PIX: cspconlutas.rs</p>
   </div>
 </div>
 
-<!-- Loading -->
 <div class="page" id="loading-page">
   <div class="loading-screen">
     <div class="spinner"></div>
-    <p>Carregando números...</p>
+    <p>Carregando numeros...</p>
   </div>
 </div>
 
-<!-- Modal -->
 <div class="overlay" id="overlay" onclick="closeModal()">
   <div class="modal" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" onclick="closeModal()">X</button>
     <div class="modal-header">
       <div class="modal-big-num" id="modal-num">00</div>
       <h2>Confirmar Escolha</h2>
@@ -584,49 +498,68 @@
         <label>Quem ofereceu o link? *</label>
         <input type="text" id="input-ofereceu" placeholder="Nome de quem te indicou">
       </div>
-      <p class="modal-note">
-        Após confirmar, efetue o pagamento de <strong>R$20</strong> via PIX para
-        <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="771404071418191b0203160459050437101a161e1b5914181a">[email&#160;protected]</a></strong> e envie o comprovante pelo WhatsApp.
+      <p class="modal-note" id="modal-note-text">
+        Apos confirmar, efetue o pagamento de R$20 via PIX e envie o comprovante pelo WhatsApp.
       </p>
       <button class="confirm-btn" id="confirm-btn" onclick="confirmChoice()" disabled>
-        Confirmar Número
+        Confirmar Numero
       </button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast">
-  <div class="toast-icon" id="toast-icon">✓</div>
+  <div class="toast-icon" id="toast-icon">V</div>
   <div>
     <strong id="toast-title"></strong>
     <span class="sub" id="toast-sub"></span>
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-  // ── Supabase client ──
-  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script>
+  // Configuracao Supabase
+  var SUPABASE_URL = 'https://lvgmabbdgnymrzqpqywy.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2Z21hYmJkZ255bXJ6cXBxeXd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUzMzMsImV4cCI6MjA4ODk0MTMzM30.t5EjBugUEErc4cbLRVuwqBnt6JbZ_ow8t2ARWVbTcWQ';
 
-  // ── State ──
-  const TOTAL = 101;
-  let taken = {};     // { numero: { nome, ofereceu, data } }
-  let logData = [];   // from log_escolhas table
-  let selectedNumber = null;
-  let logOpen = false;
-  let infoOpen = false;
+  // Email PIX (montado via JS para evitar filtros)
+  var PIX_EMAIL = 'cspconlutas.rs' + '@' + 'gmail.com';
+  document.getElementById('pix1').textContent = PIX_EMAIL;
+  document.getElementById('pix2').textContent = 'PIX: ' + PIX_EMAIL;
+  document.getElementById('modal-note-text').innerHTML =
+    'Apos confirmar, efetue o pagamento de <strong>R$20</strong> via PIX para <strong>' +
+    PIX_EMAIL + '</strong> e envie o comprovante pelo WhatsApp.';
 
-  // ── Init ──
+  // Cliente Supabase
+  var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Estado
+  var TOTAL = 101;
+  var taken = {};
+  var logData = [];
+  var selectedNumber = null;
+  var logOpen = false;
+  var infoOpen = false;
+
+  function escHTML(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function getAvailableList() {
+    var arr = [];
+    for (var i = 0; i <= 100; i++) { if (!taken[i]) arr.push(i); }
+    return arr;
+  }
+
+  // Inicializacao
   async function init() {
     try {
-      // Load all chosen numbers
-      const { data: escolhas, error: e1 } = await db
-        .from('escolhas')
-        .select('*');
-      if (e1) throw e1;
+      var r1 = await db.from('escolhas').select('*');
+      if (r1.error) throw r1.error;
 
       taken = {};
-      (escolhas || []).forEach(row => {
+      (r1.data || []).forEach(function(row) {
         taken[row.numero] = {
           nome: row.nome,
           ofereceu: row.ofereceu,
@@ -634,26 +567,22 @@
         };
       });
 
-      // Load log
-      const { data: logRows, error: e2 } = await db
-        .from('log_escolhas')
-        .select('*')
-        .order('created_at', { ascending: true });
-      if (e2) throw e2;
+      var r2 = await db.from('log_escolhas').select('*').order('created_at', { ascending: true });
+      if (r2.error) throw r2.error;
 
-      logData = (logRows || []).map(row => ({
-        timestamp: new Date(row.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
-        nome: row.nome,
-        ofereceu: row.ofereceu,
-        numero: row.numero,
-        total_disponiveis: row.disponiveis,
-        numeros_livres: row.numeros_livres
-      }));
+      logData = (r2.data || []).map(function(row) {
+        return {
+          timestamp: new Date(row.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+          nome: row.nome,
+          ofereceu: row.ofereceu,
+          numero: row.numero,
+          total_disponiveis: row.disponiveis,
+          numeros_livres: row.numeros_livres
+        };
+      });
 
-      // Show page
       document.getElementById('loading-page').style.display = 'none';
       document.getElementById('page').style.display = 'block';
-
       renderGrid();
       updateStats();
       subscribeRealtime();
@@ -662,36 +591,33 @@
       console.error('Erro ao carregar:', err);
       document.getElementById('loading-page').style.display = 'none';
       document.getElementById('page').style.display = 'block';
-      showError('Erro ao conectar ao banco de dados. Verifique a configuração do Supabase.');
+      showError('Erro ao conectar: ' + (err.message || JSON.stringify(err)));
     }
   }
 
-  // ── Realtime subscription ──
   function subscribeRealtime() {
-    db
-      .channel('escolhas-changes')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'escolhas' }, (payload) => {
-        const row = payload.new;
+    db.channel('escolhas-changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'escolhas' }, function(payload) {
+        var row = payload.new;
         if (!taken[row.numero]) {
           taken[row.numero] = {
             nome: row.nome,
             ofereceu: row.ofereceu,
             data: new Date(row.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
           };
-          renderGrid(row.numero); // pass the just-taken number for animation
+          renderGrid(row.numero);
           updateStats(true);
         }
       })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'escolhas' }, () => {
-        // On reset, reload everything
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'escolhas' }, function() {
         location.reload();
       })
-      .subscribe((status) => {
-        const dot = document.getElementById('live-dot');
-        const text = document.getElementById('live-text');
+      .subscribe(function(status) {
+        var dot = document.getElementById('live-dot');
+        var text = document.getElementById('live-text');
         if (status === 'SUBSCRIBED') {
           dot.classList.remove('offline');
-          text.textContent = 'Conectado — dados em tempo real';
+          text.textContent = 'Conectado - dados em tempo real';
         } else {
           dot.classList.add('offline');
           text.textContent = 'Reconectando...';
@@ -699,43 +625,40 @@
       });
   }
 
-  // ── Render ──
   function renderGrid(justTakenNum) {
-    const grid = document.getElementById('grid');
+    var grid = document.getElementById('grid');
     grid.innerHTML = '';
-    for (let i = 0; i <= 100; i++) {
-      const btn = document.createElement('button');
-      const isTaken = !!taken[i];
-      const isJust = (justTakenNum === i);
+    for (var i = 0; i <= 100; i++) {
+      var btn = document.createElement('button');
+      var isTaken = !!taken[i];
+      var isJust = (justTakenNum === i);
       btn.className = 'cell ' + (isTaken ? 'taken' : 'available') + (isJust ? ' just-taken' : '');
       btn.style.animationDelay = (i * 6) + 'ms';
-      btn.title = isTaken ? 'Escolhido por ' + taken[i].nome : 'Número ' + i + ' — Disponível (clique para escolher)';
+      btn.title = isTaken ? 'Escolhido por ' + taken[i].nome : 'Numero ' + i + ' - Disponivel';
       btn.innerHTML = '<span class="num">' + String(i).padStart(2, '0') + '</span>' +
-        (isTaken ? '<span class="x-mark">✕</span>' : '');
-      if (!isTaken) btn.onclick = () => openModal(i);
+        (isTaken ? '<span class="x-mark">X</span>' : '');
+      if (!isTaken) {
+        (function(num) { btn.onclick = function() { openModal(num); }; })(i);
+      }
       grid.appendChild(btn);
     }
   }
 
   function updateStats(animate) {
-    const takenCount = Object.keys(taken).length;
-    const available = TOTAL - takenCount;
-    const pct = Math.round((takenCount / TOTAL) * 100);
-
-    const elAvail = document.getElementById('stat-available');
-    const elTaken = document.getElementById('stat-taken');
-
+    var takenCount = Object.keys(taken).length;
+    var available = TOTAL - takenCount;
+    var pct = Math.round((takenCount / TOTAL) * 100);
+    var elAvail = document.getElementById('stat-available');
+    var elTaken = document.getElementById('stat-taken');
     elAvail.textContent = available;
     elTaken.textContent = takenCount;
-
     if (animate) {
       elAvail.classList.remove('bump');
       elTaken.classList.remove('bump');
-      void elAvail.offsetWidth; // reflow
+      void elAvail.offsetWidth;
       elAvail.classList.add('bump');
       elTaken.classList.add('bump');
     }
-
     document.getElementById('progress-fill').style.width = pct + '%';
     document.getElementById('progress-text').textContent = pct + '% vendido';
     document.getElementById('btn-log').textContent =
@@ -743,43 +666,37 @@
   }
 
   function renderLog() {
-    const container = document.getElementById('log-entries');
+    var container = document.getElementById('log-entries');
     if (logData.length === 0) {
       container.innerHTML = '<p class="log-empty">Nenhum registro ainda.</p>';
       return;
     }
-    container.innerHTML = [...logData].reverse().map(log =>
-      '<div class="log-entry">' +
+    var reversed = logData.slice().reverse();
+    container.innerHTML = reversed.map(function(log) {
+      return '<div class="log-entry">' +
         '<div class="log-header">' +
-          '<span class="log-num">Nº ' + String(log.numero).padStart(2, '0') + '</span>' +
+          '<span class="log-num">No ' + String(log.numero).padStart(2, '0') + '</span>' +
           '<span class="log-date">' + log.timestamp + '</span>' +
         '</div>' +
         '<div class="log-body">' +
           '<span><strong>Nome:</strong> ' + escHTML(log.nome) + '</span>' +
           '<span><strong>Ofereceu:</strong> ' + escHTML(log.ofereceu) + '</span>' +
         '</div>' +
-      '</div>'
-    ).join('');
+      '</div>';
+    }).join('');
   }
 
-  function escHTML(s) {
-    const d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
-  }
-
-  // ── Actions ──
   function openModal(num) {
     if (taken[num]) return;
     selectedNumber = num;
     document.getElementById('modal-num').textContent = String(num).padStart(2, '0');
-    document.getElementById('confirm-btn').textContent = 'Confirmar Número ' + String(num).padStart(2, '0');
+    document.getElementById('confirm-btn').textContent = 'Confirmar Numero ' + String(num).padStart(2, '0');
     document.getElementById('input-nome').value = '';
     document.getElementById('input-ofereceu').value = '';
     document.getElementById('confirm-btn').disabled = true;
     document.getElementById('confirm-btn').classList.remove('loading');
     document.getElementById('overlay').classList.add('open');
-    setTimeout(() => document.getElementById('input-nome').focus(), 250);
+    setTimeout(function() { document.getElementById('input-nome').focus(); }, 250);
   }
 
   function closeModal() {
@@ -788,65 +705,53 @@
   }
 
   function validateInputs() {
-    const nome = document.getElementById('input-nome').value.trim();
-    const ofereceu = document.getElementById('input-ofereceu').value.trim();
-    const btn = document.getElementById('confirm-btn');
+    var nome = document.getElementById('input-nome').value.trim();
+    var ofereceu = document.getElementById('input-ofereceu').value.trim();
+    var btn = document.getElementById('confirm-btn');
     btn.disabled = !(nome && ofereceu) || btn.classList.contains('loading');
   }
   document.addEventListener('input', validateInputs);
 
-  function getAvailableList() {
-    const arr = [];
-    for (let i = 0; i <= 100; i++) { if (!taken[i]) arr.push(i); }
-    return arr;
-  }
-
   async function confirmChoice() {
-    const nome = document.getElementById('input-nome').value.trim();
-    const ofereceu = document.getElementById('input-ofereceu').value.trim();
+    var nome = document.getElementById('input-nome').value.trim();
+    var ofereceu = document.getElementById('input-ofereceu').value.trim();
     if (!nome || !ofereceu || selectedNumber === null) return;
 
-    const btn = document.getElementById('confirm-btn');
+    var btn = document.getElementById('confirm-btn');
     btn.classList.add('loading');
     btn.textContent = 'Salvando...';
 
-    const numero = selectedNumber;
-    const availList = getAvailableList();
+    var numero = selectedNumber;
+    var availList = getAvailableList();
 
     try {
-      // Insert into escolhas (will fail if duplicate due to PRIMARY KEY)
-      const { error: e1 } = await db
-        .from('escolhas')
-        .insert({ numero, nome, ofereceu });
+      var r1 = await db.from('escolhas').insert({ numero: numero, nome: nome, ofereceu: ofereceu });
 
-      if (e1) {
-        if (e1.code === '23505') {
-          // Duplicate — someone else grabbed it
+      if (r1.error) {
+        if (r1.error.code === '23505') {
           taken[numero] = { nome: '(outro)', ofereceu: '', data: '' };
           renderGrid();
           updateStats();
           closeModal();
-          showToast('Número ' + String(numero).padStart(2, '0') + ' já foi escolhido!', 'Alguém pegou antes. Tente outro número.', true);
+          showToast('Numero ' + String(numero).padStart(2, '0') + ' ja foi escolhido!', 'Alguem pegou antes. Tente outro numero.', true);
           return;
         }
-        throw e1;
+        throw r1.error;
       }
 
-      // Insert into log
       await db.from('log_escolhas').insert({
-        numero,
-        nome,
-        ofereceu,
+        numero: numero,
+        nome: nome,
+        ofereceu: ofereceu,
         disponiveis: availList.length,
         numeros_livres: availList.join(', ')
       });
 
-      // Update local state
-      const now = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-      taken[numero] = { nome, ofereceu, data: now };
+      var now = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+      taken[numero] = { nome: nome, ofereceu: ofereceu, data: now };
       logData.push({
         timestamp: now,
-        nome, ofereceu, numero,
+        nome: nome, ofereceu: ofereceu, numero: numero,
         total_disponiveis: availList.length,
         numeros_livres: availList.join(', ')
       });
@@ -854,25 +759,21 @@
       closeModal();
       renderGrid(numero);
       updateStats(true);
-
-      showToast(
-        'Número ' + String(numero).padStart(2, '0') + ' reservado!',
-        'Efetue o pagamento via PIX e envie o comprovante. Boa sorte, ' + nome + '!'
-      );
+      showToast('Numero ' + String(numero).padStart(2, '0') + ' reservado!',
+        'Efetue o pagamento via PIX e envie o comprovante. Boa sorte, ' + nome + '!');
 
     } catch (err) {
       console.error('Erro ao salvar:', err);
       btn.classList.remove('loading');
-      btn.textContent = 'Confirmar Número ' + String(numero).padStart(2, '0');
-      showToast('Erro ao salvar', 'Tente novamente. Se o problema persistir, entre em contato.', true);
+      btn.textContent = 'Confirmar Numero ' + String(numero).padStart(2, '0');
+      showToast('Erro ao salvar', 'Tente novamente.', true);
     }
   }
 
   function toggleInfo() {
     infoOpen = !infoOpen;
     document.getElementById('info-box').classList.toggle('open', infoOpen);
-    document.getElementById('info-btn').textContent =
-      (infoOpen ? '▲ Ocultar informações' : '▼ Como participar');
+    document.getElementById('info-btn').textContent = infoOpen ? 'Ocultar informacoes' : 'Como participar';
   }
 
   function toggleLog() {
@@ -883,29 +784,27 @@
   }
 
   function downloadLog() {
-    let txt = '═══════════════════════════════════════════════════\n';
-    txt += '   AÇÃO ENTRE AMIG@S - CSP-Conlutas\n';
-    txt += '   Kit Chimarrão e Mateira - R$20/número\n';
-    txt += '═══════════════════════════════════════════════════\n\n';
-
-    logData.forEach((log, i) => {
-      txt += '── Registro #' + (i + 1) + ' ──────────────────────────\n';
+    var txt = '===================================================\n';
+    txt += '   ACAO ENTRE AMIGOS - CSP-Conlutas\n';
+    txt += '   Kit Chimarrao e Mateira - R$20/numero\n';
+    txt += '===================================================\n\n';
+    logData.forEach(function(log, i) {
+      txt += '-- Registro #' + (i + 1) + ' --------------------------\n';
       txt += 'Data/Hora: ' + log.timestamp + '\n';
       txt += 'Nome: ' + log.nome + '\n';
       txt += 'Quem ofereceu: ' + log.ofereceu + '\n';
-      txt += 'Número escolhido: ' + log.numero + '\n';
-      txt += 'Números disponíveis no momento: ' + log.numeros_livres + '\n';
-      txt += 'Total disponíveis: ' + log.total_disponiveis + '\n\n';
+      txt += 'Numero escolhido: ' + log.numero + '\n';
+      txt += 'Numeros disponiveis no momento: ' + log.numeros_livres + '\n';
+      txt += 'Total disponiveis: ' + log.total_disponiveis + '\n\n';
     });
+    txt += '===================================================\n';
+    txt += 'Total de numeros vendidos: ' + Object.keys(taken).length + '\n';
+    txt += 'Total disponiveis agora: ' + getAvailableList().length + '\n';
+    txt += '===================================================\n';
 
-    txt += '═══════════════════════════════════════════════════\n';
-    txt += 'Total de números vendidos: ' + Object.keys(taken).length + '\n';
-    txt += 'Total disponíveis agora: ' + getAvailableList().length + '\n';
-    txt += '═══════════════════════════════════════════════════\n';
-
-    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    var blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
     a.href = url;
     a.download = 'log-acao-amigos-' + new Date().toISOString().slice(0, 10) + '.txt';
     a.click();
@@ -913,12 +812,12 @@
   }
 
   async function resetAll() {
-    const senha = prompt('Para resetar, digite a senha de administrador:');
+    var senha = prompt('Para resetar, digite a senha de administrador:');
     if (senha !== 'cspconlutas2026') {
       if (senha !== null) alert('Senha incorreta.');
       return;
     }
-    if (!confirm('ATENÇÃO: Isso vai apagar TODOS os números escolhidos.\nEsta ação NÃO pode ser desfeita.\n\nConfirmar reset?')) return;
+    if (!confirm('ATENCAO: Isso vai apagar TODOS os numeros escolhidos.\nEsta acao NAO pode ser desfeita.\n\nConfirmar reset?')) return;
 
     try {
       await db.from('log_escolhas').delete().gte('id', 0);
@@ -930,4 +829,36 @@
       renderLog();
       logOpen = false;
       document.getElementById('log-container').classList.remove('open');
-      showToast('Dados resetados', 'Todos os números estão disponívei
+      showToast('Dados resetados', 'Todos os numeros estao disponiveis novamente.');
+    } catch (err) {
+      console.error('Erro ao resetar:', err);
+      showToast('Erro ao resetar', 'Tente novamente.', true);
+    }
+  }
+
+  function showError(msg) {
+    var el = document.getElementById('error-banner');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  var toastTimer;
+  function showToast(title, sub, isError) {
+    clearTimeout(toastTimer);
+    var toast = document.getElementById('toast');
+    document.getElementById('toast-title').textContent = title;
+    document.getElementById('toast-sub').textContent = sub;
+    document.getElementById('toast-icon').textContent = isError ? 'X' : 'V';
+    toast.classList.remove('show', 'error');
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    if (isError) toast.classList.add('error');
+    toastTimer = setTimeout(function() { toast.classList.remove('show', 'error'); }, 4500);
+  }
+
+  // Iniciar
+  init();
+</script>
+
+</body>
+</html>
