@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Acao entre Amigos - CSP-Conlutas RS</title>
+<title>Acao entre Amigos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -113,17 +113,6 @@
   }
   .price-tag .label { color: rgba(255,255,255,0.75); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
   .price-tag .value { color: var(--yellow); font-size: 30px; font-weight: 800; font-family: 'Baloo 2', cursive; line-height: 1.1; }
-  .price-tag .pix-chave {
-    color: #fff;
-    font-size: 12px;
-    margin-top: 5px;
-    font-weight: 500;
-    background: rgba(0,0,0,0.3);
-    padding: 3px 10px;
-    border-radius: 20px;
-    display: inline-block;
-  }
-  /* --- FONTE AUMENTADA E DESTACADA --- */
   .price-tag .pix-aviso {
     color: rgba(255,255,255,0.95);
     font-size: 13px;
@@ -352,8 +341,8 @@
     animation: modalIn 0.3s ease;
   }
   @keyframes modalIn {
-    from { transform: scale(0.88) translateY(20px); opacity: 0; }
-    to { transform: scale(1) translateY(0); opacity: 1; }
+    from { transform: transform scale(0.88) translateY(20px); opacity: 0; }
+    to { transform: transform scale(1) translateY(0); opacity: 1; }
   }
   .modal-close {
     position: absolute; top: 12px; right: 12px;
@@ -391,7 +380,7 @@
     box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
   }
   .modal-note {
-    font-size: 12px; color: #888;
+    font-size: 13px; color: #555;
     background: #f8f7f5; padding: 13px;
     border-radius: 10px; margin-bottom: 18px;
     line-height: 1.55;
@@ -456,7 +445,6 @@
     <div class="price-tag">
       <span class="label">Valor do numero</span>
       <span class="value">R$ 20</span>
-      <span class="pix-chave" id="pix-header"></span>
       <span class="pix-aviso">Reserva de numero - so confirmada apos recebimento do PIX</span>
     </div>
   </div>
@@ -490,13 +478,12 @@
     <button id="info-btn" onclick="toggleInfo()">Como participar</button>
   </div>
   <div class="info-box" id="info-box">
-    <div class="info-step"><span class="step-num">1</span> Escolha um numero disponivel (azul)</div>
-    <div class="info-step"><span class="step-num">2</span> Preencha seu nome e quem ofereceu</div>
-    <div class="info-step"><span class="step-num">3</span> <span id="pix1-step">Use a chave PIX: cspconlutas.rs ou QRcode / copia e cola que constam na mensagem que vc recebeu.</span></div>
-    <div class="info-step"><span class="step-num">4</span> Envie o comprovante para confirmar</div>
-    <div class="info-step"><span class="step-num">5</span> Aguarde o sorteio pela Loteria Federal</div>
-    <p class="info-note">Serao considerados os dois ultimos numeros do 1o premio.</p>
-    <p class="info-contact">WhatsApp: (51) 92000-1595 - Alexandre (Guarda-Chuva)</p>
+    <div class="info-step"><span class="step-num">*</span> Escolha um numero disponivel (azul)</div>
+    <div class="info-step"><span class="step-num">*</span> Preencha seu nome e quem ofereceu</div>
+    <div class="info-step"><span class="step-num">*</span> Use a chave copia e cola que vai estar na area de transferencia no app do seu banco.</div>
+    <div class="info-step"><span class="step-num">*</span> Aguarde o sorteio pela Loteria Federal</div>
+    <p class="info-note">Serao considerados os dois ultimos numeros do 10 premio.</p>
+    <p class="info-contact">WhatsApp: (51) 92000-1595 - Alexandre (Guarda-chuva)</p>
   </div>
   <div class="legend">
     <div class="legend-item"><div class="legend-dot av"></div><span class="legend-text">Disponivel</span></div>
@@ -514,8 +501,8 @@
     <div id="log-entries"></div>
   </div>
   <div class="footer">
-    <p class="f1">Sorteio pela Loteria Federal - Dois ultimos numeros do 1o premio</p>
-    <p class="f2">WhatsApp: (51) 92000-1595 - Alexandre (Guarda-Chuva)</p>
+    <p class="f1">Sorteio pela Loteria Federal - Dois ultimos numeros do 10 premio</p>
+    <p class="f2">WhatsApp: (51) 92000-1595 - Alexandre (Guarda-chuva)</p>
   </div>
 </div>
 
@@ -542,7 +529,10 @@
         <label>Quem ofereceu o link? *</label>
         <input type="text" id="input-ofereceu" placeholder="Nome de quem te indicou">
       </div>
-      <p class="modal-note" id="modal-note-text"></p>
+      <p class="modal-note">
+        Apos confirmar, o codigo <strong>PIX Copia e Cola</strong> sera copiado para o seu celular. Cole no app do seu banco para pagar R$20.<br><br>
+        <strong style="font-size:14px; color: var(--red);">Reserva de numero - so confirmada apos pagamento.</strong>
+      </p>
       <button class="confirm-btn" id="confirm-btn" onclick="confirmChoice()" disabled>
         Confirmar Numero
       </button>
@@ -566,18 +556,6 @@
   // URL DO GOOGLE APPS SCRIPT
   var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLZwBqAAPSTXobabmeBP1mnniJ3ednYoHagVVEq-0aMZeOawC_7P8IqDU5xR725OImcw/exec';
 
-  // Email PIX
-  var PIX_EMAIL = 'cspconlutas.rs' + '@' + 'gmail.com';
-  document.getElementById('pix-header').textContent = 'PIX: ' + PIX_EMAIL;
-  document.getElementById('pix1-step').innerHTML =
-    'Use a chave PIX: <strong>' + PIX_EMAIL + '</strong> ou QRcode / copia e cola que constam na mensagem que vc recebeu.';
-    
-  // AUMENTADO E DESTACADO NO MODAL
-  document.getElementById('modal-note-text').innerHTML =
-    'Apos confirmar, efetue o pagamento de <strong>R$20</strong> via PIX: <strong>' +
-    PIX_EMAIL + '</strong> ou use o QRcode / copia e cola da mensagem que vc recebeu.<br><br>' +
-    '<strong style="font-size:14px; color: var(--red);">Reserva de numero - so confirmada apos recebimento do PIX.</strong>';
-
   // Cliente Supabase
   var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -590,7 +568,7 @@
   var infoOpen = false;
   var adminVisible = false;
 
-  // --- NOVAS FUNÇÕES: GERADOR PIX E ÁREA DE TRANSFERÊNCIA ---
+  // --- FUNÇÕES: GERADOR PIX E ÁREA DE TRANSFERÊNCIA ---
 
   // Calcula o código verificador (CRC16) obrigatório do PIX
   function crc16Pix(payload) {
@@ -609,12 +587,13 @@
   // Gera a linha digitável do PIX com o número escolhido na observação
   function gerarPixCopiaECola(numero) {
     let numStr = String(numero).padStart(2, '0');
-    let txid = "Rifa" + numStr; // O identificador ficará ex: Rifa05
+    let txid = "AcaoEntreAmigos" + numStr; // O identificador ficará ex: AcaoEntreAmigos05
     let field62_inner = "05" + String(txid.length).padStart(2, '0') + txid;
     let field62 = "62" + String(field62_inner.length).padStart(2, '0') + field62_inner;
     
-    // Base do Pix (valor R$20 fixo)
-    let payload = "00020126460014BR.GOV.BCB.PIX0124cspconlutas.rs@gmail.com520400005303986540520.005802BR5901N6001C" + field62 + "6304";
+    // Base do Pix (valor R$20 fixo e chave de email embutida secretamente)
+    let base = "00020126460014BR.GOV.BCB.PIX0124cspconlutas.rs@gmail.com520400005303986540520.005802BR5901N6001C";
+    let payload = base + field62 + "6304";
     return payload + crc16Pix(payload);
   }
 
@@ -811,7 +790,7 @@
 
   function gerarConteudoLog(novoRegistro = null) {
     var txt = '===================================================\n';
-    txt += '   ACAO ENTRE AMIGOS - CSP-Conlutas\n';
+    txt += '   ACAO ENTRE AMIGOS\n';
     txt += '   Kit Chimarrao e Mateira - R$20/numero\n';
     txt += '===================================================\n\n';
     logData.forEach(function(log, i) {
@@ -923,11 +902,11 @@
       try {
         await copyToClipboard(pixCode);
         showToast('Numero ' + String(numero).padStart(2, '0') + ' reservado!',
-          '✅ CÓDIGO PIX COPIADO! Cole no seu app de banco, pague R$20 e envie o comprovante.');
+          '✅ CÓDIGO PIX COPIADO! Cole no seu app de banco, pague R$20.');
       } catch (err) {
         // Fallback caso o navegador por segurança bloqueie a cópia
         showToast('Numero ' + String(numero).padStart(2, '0') + ' reservado!',
-          'Efetue o pagamento via PIX e envie o comprovante. Boa sorte!');
+          '✅ Reserva salva! Efetue o pagamento de R$20.');
       }
 
     } catch (err) {
