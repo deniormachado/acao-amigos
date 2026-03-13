@@ -124,13 +124,15 @@
     border-radius: 20px;
     display: inline-block;
   }
+  /* --- FONTE AUMENTADA E DESTACADA AQUI --- */
   .price-tag .pix-aviso {
-    color: rgba(255,255,255,0.7);
-    font-size: 9px;
-    margin-top: 4px;
-    font-weight: 400;
+    color: rgba(255,255,255,0.95);
+    font-size: 13px;
+    margin-top: 8px;
+    font-weight: 700;
     line-height: 1.3;
-    max-width: 220px;
+    max-width: 250px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
   .live-bar {
     background: var(--dark);
@@ -573,7 +575,7 @@
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2Z21hYmJkZ255bXJ6cXBxeXd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUzMzMsImV4cCI6MjA4ODk0MTMzM30.t5EjBugUEErc4cbLRVuwqBnt6JbZ_ow8t2ARWVbTcWQ';
 
   // ▼▼▼ COLE AQUI A URL DO GOOGLE APPS SCRIPT ▼▼▼
-  var GOOGLE_SCRIPT_URL = 'COLE_SUA_URL_AQUI';
+  var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLZwBqAAPSTXobabmeBP1mnniJ3ednYoHagVVEq-0aMZeOawC_7P8IqDU5xR725OImcw/exec';
   // ▲▲▲ ────────────────────────────────────── ▲▲▲
 
   // Email PIX (montado via JS para evitar filtros)
@@ -583,10 +585,12 @@
   // Manter nas instrucoes
   document.getElementById('pix1-step').innerHTML =
     'Use a chave PIX: <strong>' + PIX_EMAIL + '</strong> ou QRcode / copia e cola que constam na mensagem que vc recebeu.';
+    
+  // AUMENTADO E DESTACADO NO MODAL
   document.getElementById('modal-note-text').innerHTML =
     'Apos confirmar, efetue o pagamento de <strong>R$20</strong> via PIX: <strong>' +
     PIX_EMAIL + '</strong> ou use o QRcode / copia e cola da mensagem que vc recebeu.<br><br>' +
-    '<em style="font-size:11px;">Reserva de numero - so confirmada apos recebimento do PIX.</em>';
+    '<strong style="font-size:14px; color: var(--red);">Reserva de numero - so confirmada apos recebimento do PIX.</strong>';
 
   // Cliente Supabase
   var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -819,11 +823,17 @@
     };
 
     try {
+      // AJUSTE: Utilizado 'mode: no-cors' e 'Content-Type: text/plain' para evitar o erro 
+      // de bloqueio de navegadores (CORS Preflight) garantindo que o GAS receba os dados.
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
         body: JSON.stringify(dados)
       });
-      console.log('E-mails enviados com sucesso');
+      console.log('Sinal de e-mail enviado com sucesso (sem bloqueio de CORS)');
     } catch (error) {
       console.error('Erro ao enviar e-mails:', error);
     }
