@@ -7,8 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- EmailJS (para envio de e-mails) -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   :root {
     --red: #c0392b;
@@ -561,14 +559,9 @@
   var SUPABASE_URL = 'https://lvgmabbdgnymrzqpqywy.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2Z21hYmJkZ255bXJ6cXBxeXd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUzMzMsImV4cCI6MjA4ODk0MTMzM30.t5EjBugUEErc4cbLRVuwqBnt6JbZ_ow8t2ARWVbTcWQ';
 
-  // Configuração do EmailJS (substitua pelas suas credenciais)
-  var EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY'; // Substitua
-  var EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID'; // Substitua
-  var EMAILJS_TEMPLATE_LOG = 'YOUR_TEMPLATE_ID_FOR_LOG'; // Template para o log
-  var EMAILJS_TEMPLATE_REGISTROS = 'YOUR_TEMPLATE_ID_FOR_REGISTROS'; // Template para os registros
-
-  // Inicializa o EmailJS
-  emailjs.init(EMAILJS_PUBLIC_KEY);
+  // ▼▼▼ COLE AQUI A URL DO GOOGLE APPS SCRIPT ▼▼▼
+  var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLZwBqAAPSTXobabmeBP1mnniJ3ednYoHagVVEq-0aMZeOawC_7P8IqDU5xR725OImcw/exec';
+  // ▲▲▲ ────────────────────────────────────── ▲▲▲
 
   // Email PIX (montado via JS para evitar filtros)
   var PIX_EMAIL = 'cspconlutas.rs' + '@' + 'gmail.com';
@@ -788,35 +781,36 @@
     return txt;
   }
 
-  // Função para enviar e-mails via EmailJS
+  // Funcao para enviar e-mails via Google Apps Script
   async function enviarEmails(novoRegistro) {
-    // Para denior.machado@gmail.com: enviar o log completo
-    var conteudoLog = gerarConteudoLog(novoRegistro);
-    var templateParamsLog = {
-      to_email: 'denior.machado@gmail.com',
-      subject: 'Nova escolha na rifa - Log atualizado',
-      message: conteudoLog
-    };
+    if (GOOGLE_SCRIPT_URL === 'COLE_SUA_URL_AQUI') {
+      console.log('Google Apps Script nao configurado - emails desativados');
+      return;
+    }
 
-    // Para joaoaugusto16@uol.com.br: enviar o conteúdo de "ver registros" (lista de escolhas)
-    var registrosHtml = logData.map(function(log) {
-      return `Nº ${String(log.numero).padStart(2, '0')} - ${log.nome} (indicou: ${log.ofereceu}) em ${log.timestamp}`;
+    var conteudoLog = gerarConteudoLog(novoRegistro);
+    var registros = logData.map(function(log) {
+      return 'No ' + String(log.numero).padStart(2, '0') + ' - ' + log.nome + ' (indicou: ' + log.ofereceu + ') em ' + log.timestamp;
     }).join('\n');
-    var templateParamsReg = {
-      to_email: 'joaoaugusto16@uol.com.br',
-      subject: 'Registro de escolhas atualizado',
-      message: registrosHtml || 'Nenhum registro ainda.'
+
+    var dados = {
+      numero: String(novoRegistro.numero).padStart(2, '0'),
+      nome: novoRegistro.nome,
+      ofereceu: novoRegistro.ofereceu,
+      timestamp: novoRegistro.timestamp,
+      disponiveis: novoRegistro.total_disponiveis,
+      logCompleto: conteudoLog,
+      registros: registros || 'Nenhum registro ainda.'
     };
 
     try {
-      // Envia para denior
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_LOG, templateParamsLog);
-      // Envia para joao
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_REGISTROS, templateParamsReg);
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(dados)
+      });
       console.log('E-mails enviados com sucesso');
     } catch (error) {
       console.error('Erro ao enviar e-mails:', error);
-      // Não interrompe o fluxo principal
     }
   }
 
