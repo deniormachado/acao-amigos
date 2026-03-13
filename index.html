@@ -124,6 +124,14 @@
     border-radius: 20px;
     display: inline-block;
   }
+  .price-tag .pix-aviso {
+    color: rgba(255,255,255,0.7);
+    font-size: 9px;
+    margin-top: 4px;
+    font-weight: 400;
+    line-height: 1.3;
+    max-width: 220px;
+  }
   .live-bar {
     background: var(--dark);
     padding: 8px 20px;
@@ -286,18 +294,23 @@
   }
   .admin button:hover { filter: brightness(1.1); }
   .btn-admin {
-    background: var(--dark);
+    background: #e0e0e0;
+    color: #999;
     flex: 0 0 auto;
     min-width: auto;
-    width: 46px;
-    height: 46px;
-    border-radius: 50% !important;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px !important;
     padding: 0 !important;
-    font-size: 20px !important;
+    font-size: 12px !important;
     display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+    border: 1px solid #ccc;
   }
+  .btn-admin:hover { opacity: 0.8; }
   .btn-log { background: var(--dark); }
   .btn-download { background: var(--green); }
   .btn-reset { background: var(--red); flex: 0; min-width: 100px; }
@@ -446,11 +459,11 @@
   <div class="header">
     <div class="badge">ACAO ENTRE AMIG@S</div>
     <h1>Kit Chimarrao<br>e Mateira</h1>
-    <p class="subtitle">CSP-Conlutas RS</p>
     <div class="price-tag">
       <span class="label">Valor do numero</span>
       <span class="value">R$ 20</span>
       <span class="pix-chave" id="pix-header"></span>
+      <span class="pix-aviso">Reserva de numero - so confirmada apos recebimento do PIX</span>
     </div>
   </div>
   <div class="live-bar">
@@ -485,7 +498,7 @@
   <div class="info-box" id="info-box">
     <div class="info-step"><span class="step-num">1</span> Escolha um numero disponivel (azul)</div>
     <div class="info-step"><span class="step-num">2</span> Preencha seu nome e quem ofereceu</div>
-    <div class="info-step"><span class="step-num">3</span> Pague via PIX: <strong id="pix1">cspconlutas.rs</strong></div>
+    <div class="info-step"><span class="step-num">3</span> <span id="pix1-step">Use a chave PIX: cspconlutas.rs ou QRcode / copia e cola que constam na mensagem que vc recebeu.</span></div>
     <div class="info-step"><span class="step-num">4</span> Envie o comprovante para confirmar</div>
     <div class="info-step"><span class="step-num">5</span> Aguarde o sorteio pela Loteria Federal</div>
     <p class="info-note">Serao considerados os dois ultimos numeros do 1o premio.</p>
@@ -497,7 +510,7 @@
   </div>
   <div class="grid" id="grid"></div>
   <div class="admin">
-    <button class="btn-admin" id="btn-admin" onclick="toggleAdmin()">🔒</button>
+    <button class="btn-admin" id="btn-admin" onclick="toggleAdmin()">&#9881;</button>
     <button class="btn-log" id="btn-log" onclick="toggleLog()">Ver Registros (0)</button>
     <button class="btn-download" id="btn-download" onclick="downloadLog()">Baixar Log</button>
     <button class="btn-reset" id="btn-reset" onclick="resetAll()">Resetar</button>
@@ -560,18 +573,20 @@
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2Z21hYmJkZ255bXJ6cXBxeXd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUzMzMsImV4cCI6MjA4ODk0MTMzM30.t5EjBugUEErc4cbLRVuwqBnt6JbZ_ow8t2ARWVbTcWQ';
 
   // ▼▼▼ COLE AQUI A URL DO GOOGLE APPS SCRIPT ▼▼▼
-  var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLZwBqAAPSTXobabmeBP1mnniJ3ednYoHagVVEq-0aMZeOawC_7P8IqDU5xR725OImcw/exec';
+  var GOOGLE_SCRIPT_URL = 'COLE_SUA_URL_AQUI';
   // ▲▲▲ ────────────────────────────────────── ▲▲▲
 
   // Email PIX (montado via JS para evitar filtros)
   var PIX_EMAIL = 'cspconlutas.rs' + '@' + 'gmail.com';
   // Colocar a chave PIX no header (abaixo do valor)
   document.getElementById('pix-header').textContent = 'PIX: ' + PIX_EMAIL;
-  // Manter no modal
-  document.getElementById('pix1').textContent = PIX_EMAIL;
+  // Manter nas instrucoes
+  document.getElementById('pix1-step').innerHTML =
+    'Use a chave PIX: <strong>' + PIX_EMAIL + '</strong> ou QRcode / copia e cola que constam na mensagem que vc recebeu.';
   document.getElementById('modal-note-text').innerHTML =
-    'Apos confirmar, efetue o pagamento de <strong>R$20</strong> via PIX para <strong>' +
-    PIX_EMAIL + '</strong> e envie o comprovante pelo WhatsApp.';
+    'Apos confirmar, efetue o pagamento de <strong>R$20</strong> via PIX: <strong>' +
+    PIX_EMAIL + '</strong> ou use o QRcode / copia e cola da mensagem que vc recebeu.<br><br>' +
+    '<em style="font-size:11px;">Reserva de numero - so confirmada apos recebimento do PIX.</em>';
 
   // Cliente Supabase
   var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -905,7 +920,7 @@
 
   async function resetAll() {
     var senha = prompt('Para resetar, digite a senha de administrador:');
-    if (senha !== 'cspconlutas2026') {
+    if (senha !== '8965') {
       if (senha !== null) alert('Senha incorreta.');
       return;
     }
