@@ -464,9 +464,9 @@
 
 <script>
   // ▼▼▼ COLE AQUI A URL E A CHAVE DO SEU PROJETO SUPABASE ▼▼▼
- const SUPABASE_URL  = 'https://lvgmabbdgnymrzqpqywy.supabase.co';  
- const SUPABASE_KEY  = 'sb_publishable_To5nNYzjSZUPJ47_yYzngw_g7J_fFaG'; 
- // ▲▲▲ ─────────────────────────────────────────────────── ▲▲▲
+  const SUPABASE_URL  = 'https://lvgmabbdgnymrzqpqywy.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2Z21hYmJkZ255bXJ6cXBxeXd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUzMzMsImV4cCI6MjA4ODk0MTMzM30.t5EjBugUEErc4cbLRVuwqBnt6JbZ_ow8t2ARWVbTcWQ';
+  // ▲▲▲ ─────────────────────────────────────────────────── ▲▲▲
 </script>
 
 <!-- Loading screen -->
@@ -522,7 +522,7 @@
   <div class="info-box" id="info-box">
     <div class="info-step"><span class="step-num">1</span> Escolha um número disponível (azul)</div>
     <div class="info-step"><span class="step-num">2</span> Preencha seu nome e quem ofereceu</div>
-    <div class="info-step"><span class="step-num">3</span> Pague via PIX: <strong>cspconlutas.rs@gmail.com</strong></div>
+    <div class="info-step"><span class="step-num">3</span> Pague via PIX: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="63001013000c0d0f161702104d111023040e020a0f4d000c0e">[email&#160;protected]</a></strong></div>
     <div class="info-step"><span class="step-num">4</span> Envie o comprovante para confirmar</div>
     <div class="info-step"><span class="step-num">5</span> Aguarde o sorteio pela Loteria Federal</div>
     <p class="info-note">Serão considerados os dois últimos números do 1º prêmio.</p>
@@ -555,7 +555,7 @@
   <div class="footer">
     <p class="f1">Sorteio pela Loteria Federal — Dois últimos números do 1º prêmio</p>
     <p class="f2">WhatsApp: (51) 92000-1595 — Alexandre (Guarda-Chuva)</p>
-    <p class="f3">PIX: cspconlutas.rs@gmail.com</p>
+    <p class="f3">PIX: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="95f6e6e5f6fafbf9e0e1f4e6bbe7e6d5f2f8f4fcf9bbf6faf8">[email&#160;protected]</a></p>
   </div>
 </div>
 
@@ -586,7 +586,7 @@
       </div>
       <p class="modal-note">
         Após confirmar, efetue o pagamento de <strong>R$20</strong> via PIX para
-        <strong>cspconlutas.rs@gmail.com</strong> e envie o comprovante pelo WhatsApp.
+        <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="771404071418191b0203160459050437101a161e1b5914181a">[email&#160;protected]</a></strong> e envie o comprovante pelo WhatsApp.
       </p>
       <button class="confirm-btn" id="confirm-btn" onclick="confirmChoice()" disabled>
         Confirmar Número
@@ -604,7 +604,7 @@
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // ── Supabase client ──
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -930,22 +930,4 @@
       renderLog();
       logOpen = false;
       document.getElementById('log-container').classList.remove('open');
-      showToast('Dados resetados', 'Todos os números estão disponíveis novamente.');
-    } catch (err) {
-      console.error('Erro ao resetar:', err);
-      showToast('Erro ao resetar', 'Tente novamente.', true);
-    }
-  }
-
-  // ── Helpers ──
-  function showError(msg) {
-    const el = document.getElementById('error-banner');
-    el.textContent = msg;
-    el.classList.add('show');
-  }
-
-  let toastTimer;
-  function showToast(title, sub, isError) {
-    clearTimeout(toastTimer);
-    const toast = document.getElementById('toast');
-    document.getEl
+      showToast('Dados resetados', 'Todos os números estão disponívei
