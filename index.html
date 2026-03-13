@@ -113,7 +113,6 @@
   }
   .price-tag .label { color: rgba(255,255,255,0.75); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
   .price-tag .value { color: var(--yellow); font-size: 30px; font-weight: 800; font-family: 'Baloo 2', cursive; line-height: 1.1; }
-  /* Nova linha para a chave PIX abaixo do valor */
   .price-tag .pix-chave {
     color: #fff;
     font-size: 12px;
@@ -124,7 +123,7 @@
     border-radius: 20px;
     display: inline-block;
   }
-  /* --- FONTE AUMENTADA E DESTACADA AQUI --- */
+  /* --- FONTE AUMENTADA E DESTACADA --- */
   .price-tag .pix-aviso {
     color: rgba(255,255,255,0.95);
     font-size: 13px;
@@ -152,13 +151,8 @@
     50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(46,204,113,0); }
   }
   .live-dot.offline { background: var(--red-light); animation: none; }
-  /* Stats e progresso inicialmente ocultos */
-  .stats-bar, .progress-row {
-    display: none;
-  }
-  .stats-bar.visible, .progress-row.visible {
-    display: flex;
-  }
+  .stats-bar, .progress-row { display: none; }
+  .stats-bar.visible, .progress-row.visible { display: flex; }
   .stats-bar {
     align-items: center; justify-content: center; gap: 0;
     padding: 0; background: #fff;
@@ -316,7 +310,6 @@
   .btn-log { background: var(--dark); }
   .btn-download { background: var(--green); }
   .btn-reset { background: var(--red); flex: 0; min-width: 100px; }
-  /* Botões administrativos inicialmente ocultos */
   #btn-log, #btn-reset, #btn-download { display: none; }
   .log-container {
     max-height: 0; overflow: hidden;
@@ -343,7 +336,6 @@
   .footer p { margin: 0 0 6px; }
   .footer .f1 { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; }
   .footer .f2 { color: var(--yellow); font-size: 14px; font-weight: 700; }
-  /* Linha do PIX removida do footer */
   .overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.55);
@@ -524,7 +516,6 @@
   <div class="footer">
     <p class="f1">Sorteio pela Loteria Federal - Dois ultimos numeros do 1o premio</p>
     <p class="f2">WhatsApp: (51) 92000-1595 - Alexandre (Guarda-Chuva)</p>
-    <!-- Linha do PIX removida -->
   </div>
 </div>
 
@@ -551,9 +542,7 @@
         <label>Quem ofereceu o link? *</label>
         <input type="text" id="input-ofereceu" placeholder="Nome de quem te indicou">
       </div>
-      <p class="modal-note" id="modal-note-text">
-        Apos confirmar, efetue o pagamento de R$20 via PIX e envie o comprovante pelo WhatsApp.
-      </p>
+      <p class="modal-note" id="modal-note-text"></p>
       <button class="confirm-btn" id="confirm-btn" onclick="confirmChoice()" disabled>
         Confirmar Numero
       </button>
@@ -574,15 +563,12 @@
   var SUPABASE_URL = 'https://lvgmabbdgnymrzqpqywy.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2Z21hYmJkZ255bXJ6cXBxeXd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUzMzMsImV4cCI6MjA4ODk0MTMzM30.t5EjBugUEErc4cbLRVuwqBnt6JbZ_ow8t2ARWVbTcWQ';
 
-  // ▼▼▼ COLE AQUI A URL DO GOOGLE APPS SCRIPT ▼▼▼
+  // URL DO GOOGLE APPS SCRIPT
   var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLZwBqAAPSTXobabmeBP1mnniJ3ednYoHagVVEq-0aMZeOawC_7P8IqDU5xR725OImcw/exec';
-  // ▲▲▲ ────────────────────────────────────── ▲▲▲
 
-  // Email PIX (montado via JS para evitar filtros)
+  // Email PIX
   var PIX_EMAIL = 'cspconlutas.rs' + '@' + 'gmail.com';
-  // Colocar a chave PIX no header (abaixo do valor)
   document.getElementById('pix-header').textContent = 'PIX: ' + PIX_EMAIL;
-  // Manter nas instrucoes
   document.getElementById('pix1-step').innerHTML =
     'Use a chave PIX: <strong>' + PIX_EMAIL + '</strong> ou QRcode / copia e cola que constam na mensagem que vc recebeu.';
     
@@ -596,13 +582,58 @@
   var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // Estado
-  var TOTAL = 100; // Agora de 0 a 99 (100 números)
+  var TOTAL = 100;
   var taken = {};
   var logData = [];
   var selectedNumber = null;
   var logOpen = false;
   var infoOpen = false;
-  var adminVisible = false; // controle dos botões administrativos e das estatísticas
+  var adminVisible = false;
+
+  // --- NOVAS FUNÇÕES: GERADOR PIX E ÁREA DE TRANSFERÊNCIA ---
+
+  // Calcula o código verificador (CRC16) obrigatório do PIX
+  function crc16Pix(payload) {
+    let crc = 0xFFFF;
+    for (let i = 0; i < payload.length; i++) {
+      crc ^= payload.charCodeAt(i) << 8;
+      for (let j = 0; j < 8; j++) {
+        if ((crc & 0x8000) !== 0) crc = ((crc << 1) ^ 0x1021);
+        else crc = crc << 1;
+      }
+      crc &= 0xFFFF;
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0');
+  }
+
+  // Gera a linha digitável do PIX com o número escolhido na observação
+  function gerarPixCopiaECola(numero) {
+    let numStr = String(numero).padStart(2, '0');
+    let txid = "Rifa" + numStr; // O identificador ficará ex: Rifa05
+    let field62_inner = "05" + String(txid.length).padStart(2, '0') + txid;
+    let field62 = "62" + String(field62_inner.length).padStart(2, '0') + field62_inner;
+    
+    // Base do Pix (valor R$20 fixo)
+    let payload = "00020126460014BR.GOV.BCB.PIX0124cspconlutas.rs@gmail.com520400005303986540520.005802BR5901N6001C" + field62 + "6304";
+    return payload + crc16Pix(payload);
+  }
+
+  // Copia o código para o celular/computador do usuário
+  async function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      let textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try { document.execCommand('copy'); } catch (err) {}
+      document.body.removeChild(textArea);
+    }
+  }
 
   function escHTML(s) {
     var d = document.createElement('div');
@@ -778,7 +809,6 @@
   }
   document.addEventListener('input', validateInputs);
 
-  // Função para gerar o conteúdo do log (mesmo formato do download)
   function gerarConteudoLog(novoRegistro = null) {
     var txt = '===================================================\n';
     txt += '   ACAO ENTRE AMIGOS - CSP-Conlutas\n';
@@ -800,7 +830,6 @@
     return txt;
   }
 
-  // Funcao para enviar e-mails via Google Apps Script
   async function enviarEmails(novoRegistro) {
     if (GOOGLE_SCRIPT_URL === 'COLE_SUA_URL_AQUI') {
       console.log('Google Apps Script nao configurado - emails desativados');
@@ -823,8 +852,6 @@
     };
 
     try {
-      // AJUSTE: Utilizado 'mode: no-cors' e 'Content-Type: text/plain' para evitar o erro 
-      // de bloqueio de navegadores (CORS Preflight) garantindo que o GAS receba os dados.
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -890,8 +917,18 @@
       closeModal();
       renderGrid(numero);
       updateStats(true);
-      showToast('Numero ' + String(numero).padStart(2, '0') + ' reservado!',
-        'Efetue o pagamento via PIX e envie o comprovante. Boa sorte, ' + nome + '!');
+      
+      // GERA PIX E COPIA AUTOMATICAMENTE
+      let pixCode = gerarPixCopiaECola(numero);
+      try {
+        await copyToClipboard(pixCode);
+        showToast('Numero ' + String(numero).padStart(2, '0') + ' reservado!',
+          '✅ CÓDIGO PIX COPIADO! Cole no seu app de banco, pague R$20 e envie o comprovante.');
+      } catch (err) {
+        // Fallback caso o navegador por segurança bloqueie a cópia
+        showToast('Numero ' + String(numero).padStart(2, '0') + ' reservado!',
+          'Efetue o pagamento via PIX e envie o comprovante. Boa sorte!');
+      }
 
     } catch (err) {
       console.error('Erro ao salvar:', err);
@@ -920,9 +957,8 @@
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    // Nome do arquivo com data, hora, minuto e segundo
     var now = new Date();
-    var iso = now.toISOString().replace(/[:.]/g, '-').substring(0, 19); // 2025-03-13T15-30-45
+    var iso = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
     a.download = 'log-acao-amigos-' + iso + '.txt';
     a.click();
     URL.revokeObjectURL(url);
@@ -973,7 +1009,6 @@
     toastTimer = setTimeout(function() { toast.classList.remove('show', 'error'); }, 4500);
   }
 
-  // Função para alternar visibilidade dos botões administrativos e das estatísticas
   function toggleAdmin() {
     var senha = prompt('Digite a senha de admin:');
     if (senha === '9871') {
@@ -988,14 +1023,12 @@
       btnReset.style.display = adminVisible ? 'block' : 'none';
       btnDownload.style.display = adminVisible ? 'block' : 'none';
 
-      // Mostra/esconde as barras de estatísticas
       if (adminVisible) {
         statsBar.classList.add('visible');
         progressRow.classList.add('visible');
       } else {
         statsBar.classList.remove('visible');
         progressRow.classList.remove('visible');
-        // Se ocultar, também fecha o log se estiver aberto (opcional)
         if (logOpen) toggleLog();
       }
     } else if (senha !== null) {
@@ -1003,7 +1036,6 @@
     }
   }
 
-  // Iniciar
   init();
 </script>
 
