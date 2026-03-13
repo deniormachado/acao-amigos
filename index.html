@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ação entre Amig@s — CSP-Conlutas RS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧉</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  /* ╔═══════════════════════════════════════════════════════╗
+     ║  AÇÃO ENTRE AMIG@S — Estilos                        ║
+     ╚═══════════════════════════════════════════════════════╝ */
+
+  :root {
+    --red: #c0392b;
+    --red-light: #e74c3c;
+    --yellow: #f1c40f;
+    --yellow-dark: #d4ac0d;
+    --blue: #2980b9;
+    --blue-light: #3498db;
+    --green: #27ae60;
+    --green-light: #2ecc71;
+    --dark: #2c3e50;
+    --gray: #95a5a6;
+    --gray-light: #bdc3c7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    background: #e8e4e0;
+    color: #333;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .page {
+    max-width: 620px;
+    margin: 0 auto;
+    background: #fafaf8;
+    min-height: 100vh;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0,0,0,0.1);
+  }
+
+  /* ── Loading ── */
+  .loading-screen {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100vh;
+    background: linear-gradient(135deg, var(--red) 0%, var(--red-light) 100%);
+  }
+  .loading-screen .spinner {
+    width: 44px; height: 44px;
+    border: 4px solid rgba(255,255,255,0.2);
+    border-top-color: var(--yellow);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-screen p { color: #fff; margin-top: 16px; font-weight: 600; font-size: 15px; }
+
+  .error-banner {
+    background: #fdecea; color: var(--red);
+    padding: 14px 20px; text-align: center;
+    font-weight: 600; font-size: 14px;
+    border-bottom: 2px solid var(--red);
+    display: none;
+  }
+  .error-banner.show { display: block; }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(150deg, #b83224 0%, var(--red-light) 40%, var(--red) 100%);
+    padding: 36px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 15% 85%, rgba(241,196,15,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 15%, rgba(241,196,15,0.08) 0%, transparent 50%),
+      repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 40px);
+  }
+  .header > * { position: relative; z-index: 1; }
+
+  .badge {
+    display: inline-block;
+    background: var(--yellow);
+    color: var(--red);
+    font-family: 'Baloo 2', cursive;
+    font-weight: 800;
+    font-size: 15px;
+    padding: 5px 22px;
+    border-radius: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+  }
+  .header h1 {
+    font-family: 'Baloo 2', cursive;
+    color: #fff;
+    font-size: 28px;
+    font-weight: 800;
+    margin: 6px 0 2px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    line-height: 1.15;
+  }
+  .header .subtitle {
+    color: rgba(255,255,255,0.8);
+    font-size: 14px;
+    margin-bottom: 18px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .price-tag {
+    display: inline-flex; flex-direction: column;
+    background: rgba(0,0,0,0.15);
+    backdrop-filter: blur(12px);
+    border-radius: 14px;
+    padding: 10px 28px;
+    border: 1.5px solid rgba(241,196,15,0.35);
+  }
+  .price-tag .label { color: rgba(255,255,255,0.75); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+  .price-tag .value { color: var(--yellow); font-size: 30px; font-weight: 800; font-family: 'Baloo 2', cursive; line-height: 1.1; }
+
+  /* ── Live indicator ── */
+  .live-bar {
+    background: var(--dark);
+    padding: 8px 20px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    background: var(--green-light);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(46,204,113,0.5); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(46,204,113,0); }
+  }
+  .live-dot.offline { background: var(--red-light); animation: none; }
+
+  /* ── Stats ── */
+  .stats-bar {
+    display: flex; align-items: center; justify-content: center; gap: 0;
+    padding: 0; background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .stat-item {
+    display: flex; flex-direction: column; align-items: center;
+    flex: 1; padding: 16px 12px;
+  }
+  .stat-number {
+    font-size: 28px; font-weight: 800; color: var(--blue);
+    line-height: 1; font-family: 'Baloo 2', cursive;
+    transition: all 0.3s;
+  }
+  .stat-number.red { color: var(--red); }
+  .stat-number.bump { animation: bump 0.35s ease; }
+  @keyframes bump {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+  .stat-label { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 3px; font-weight: 600; }
+  .stat-divider { width: 1px; height: 40px; background: #eee; }
+
+  /* ── Progress ── */
+  .progress-row {
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .progress-bg { flex: 1; height: 10px; background: #eee; border-radius: 5px; overflow: hidden; }
+  .progress-fill {
+    height: 100%; border-radius: 5px;
+    background: linear-gradient(90deg, var(--red), var(--red-light), var(--yellow));
+    background-size: 200% 100%;
+    transition: width 0.6s ease;
+    animation: shimmer 3s ease infinite;
+  }
+  @keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .progress-text { font-size: 13px; color: #888; font-weight: 700; min-width: 78px; text-align: right; }
+
+  /* ── Info ── */
+  .info-toggle { padding: 10px 20px; background: #fff; border-bottom: 1px solid #f0f0f0; }
+  .info-toggle button {
+    background: none; border: none;
+    color: var(--red); font-weight: 700; font-size: 14px;
+    cursor: pointer; padding: 4px 0; width: 100%; text-align: left;
+    font-family: inherit;
+  }
+  .info-box {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    background: #fffbeb; border-bottom: 2px solid var(--yellow);
+    padding: 0 20px;
+  }
+  .info-box.open { max-height: 400px; padding: 18px 20px; }
+  .info-step { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; }
+  .step-num {
+    width: 26px; height: 26px;
+    background: var(--red); color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .info-note { font-size: 13px; color: var(--red); font-weight: 700; margin-top: 14px; }
+  .info-contact { font-size: 13px; color: #666; margin-top: 4px; }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; justify-content: center; gap: 28px;
+    padding: 14px 20px; background: #f7f6f4;
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; }
+  .legend-dot { width: 18px; height: 18px; border-radius: 5px; }
+  .legend-dot.av { background: linear-gradient(135deg, var(--blue), var(--blue-light)); box-shadow: 0 2px 6px rgba(41,128,185,0.3); }
+  .legend-dot.tk { background: linear-gradient(135deg, var(--gray), var(--gray-light)); box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); }
+  .legend-text { font-size: 12px; color: #777; font-weight: 600; }
+
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 5px;
+    padding: 18px 14px;
+    background: #f0efed;
+  }
+  .cell {
+    aspect-ratio: 1;
+    border: none; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: transform 0.15s, box-shadow 0.15s;
+    padding: 0;
+    opacity: 0; transform: scale(0.6);
+    animation: cellIn 0.35s ease forwards;
+  }
+  @keyframes cellIn { to { opacity: 1; transform: scale(1); } }
+
+  .cell.available {
+    background: linear-gradient(145deg, var(--blue), var(--blue-light));
+    box-shadow: 0 2px 8px rgba(41,128,185,0.25);
+    color: #fff;
+  }
+  .cell.available:hover {
+    transform: scale(1.18) !important;
+    box-shadow: 0 6px 20px rgba(41,128,185,0.45);
+    z-index: 2;
+  }
+  .cell.available:active { transform: scale(1.05) !important; }
+
+  .cell.taken {
+    background: linear-gradient(145deg, #aaa, #c4c4c4);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.15);
+    color: rgba(255,255,255,0.45);
+    cursor: not-allowed;
+  }
+  .cell .num { font-size: 13px; font-weight: 700; line-height: 1; pointer-events: none; }
+  .cell .x-mark {
+    position: absolute; font-size: 22px;
+    color: rgba(192,57,43,0.5); font-weight: 900;
+    inset: 0; display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+
+  /* Just-taken animation */
+  .cell.just-taken {
+    animation: justTaken 0.6s ease;
+  }
+  @keyframes justTaken {
+    0% { transform: scale(1.2); background: var(--red-light); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── Admin ── */
+  .admin {
+    display: flex; gap: 8px; padding: 16px;
+    background: #fff; border-top: 1px solid #eee;
+    flex-wrap: wrap;
+  }
+  .admin button {
+    flex: 1; padding: 11px 14px;
+    color: #fff; border: none; border-radius: 10px;
+    font-weight: 700; font-size: 13px;
+    cursor: pointer; font-family: inherit;
+    min-width: 100px;
+    transition: filter 0.15s;
+  }
+  .admin button:hover { filter: brightness(1.1); }
+  .btn-log { background: var(--dark); }
+  .btn-download { background: var(--green); }
+  .btn-reset { background: var(--red); flex: 0; min-width: 100px; }
+
+  /* ── Log ── */
+  .log-container {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease;
+    background: #fff;
+  }
+  .log-container.open { max-height: 3000px; padding: 0 16px 16px; overflow-y: auto; }
+  .log-container h3 { font-size: 16px; font-weight: 800; color: var(--dark); margin-bottom: 12px; font-family: 'Baloo 2', cursive; }
+  .log-entry {
+    background: #f8f7f5; border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 8px;
+    border-left: 4px solid var(--red);
+    transition: background 0.15s;
+  }
+  .log-entry:hover { background: #f1f0ec; }
+  .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .log-num { font-weight: 800; font-size: 16px; color: var(--red); font-family: 'Baloo 2', cursive; }
+  .log-date { font-size: 11px; color: #999; }
+  .log-body { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: #666; }
+  .log-empty { text-align: center; color: #aaa; padding: 24px; font-style: italic; }
+
+  /* ── Footer ── */
+  .footer {
+    background: linear-gradient(150deg, var(--red), #a93226);
+    padding: 24px 20px; text-align: center;
+  }
+  .footer p { margin: 0 0 6px; }
+  .footer .f1 { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; }
+  .footer .f2 { color: var(--yellow); font-size: 14px; font-weight: 700; }
+  .footer .f3 { color: rgba(255,255,255,0.6); font-size: 12px; margin: 0; }
+
+  /* ── Modal ── */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+    backdrop-filter: blur(6px);
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 18px;
+    width: 100%; max-width: 400px;
+    overflow: hidden; position: relative;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+    animation: modalIn 0.3s ease;
+  }
+  @keyframes modalIn {
+    from { transform: scale(0.88) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .modal-close {
+    position: absolute; top: 12px; right: 12px;
+    background: rgba(255,255,255,0.9); border: none;
+    width: 34px; height: 34px; border-radius: 50%;
+    font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2; color: #333; font-weight: 700;
+    transition: background 0.15s;
+  }
+  .modal-close:hover { background: #fff; }
+  .modal-header {
+    background: linear-gradient(150deg, var(--red), var(--red-light));
+    padding: 28px 20px; text-align: center;
+  }
+  .modal-big-num {
+    font-size: 52px; font-weight: 800;
+    font-family: 'Baloo 2', cursive;
+    color: var(--yellow);
+    text-shadow: 0 3px 12px rgba(0,0,0,0.2);
+    line-height: 1; margin-bottom: 4px;
+  }
+  .modal-header h2 { color: #fff; font-size: 18px; font-weight: 700; }
+  .modal-body { padding: 24px; }
+  .input-group { margin-bottom: 18px; }
+  .input-group label {
+    display: block; font-size: 13px;
+    font-weight: 700; color: #444; margin-bottom: 6px;
+  }
+  .input-group input {
+    width: 100%; padding: 13px 15px;
+    border: 2px solid #e8e8e8; border-radius: 12px;
+    font-size: 15px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+  }
+  .input-group input:focus {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+  }
+  .modal-note {
+    font-size: 12px; color: #888;
+    background: #f8f7f5; padding: 13px;
+    border-radius: 10px; margin-bottom: 18px;
+    line-height: 1.55;
+  }
+  .confirm-btn {
+    width: 100%; padding: 15px;
+    background: linear-gradient(135deg, var(--green), var(--green-light));
+    color: #fff; border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 800;
+    cursor: pointer; font-family: inherit;
+    transition: opacity 0.2s, filter 0.15s;
+    box-shadow: 0 4px 15px rgba(39,174,96,0.3);
+  }
+  .confirm-btn:hover:not(:disabled) { filter: brightness(1.05); }
+  .confirm-btn:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+  .confirm-btn.loading { pointer-events: none; opacity: 0.6; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 20px; right: 20px;
+    background: linear-gradient(135deg, var(--green), var(--green-light));
+    color: #fff; padding: 16px 20px;
+    border-radius: 14px;
+    display: none; align-items: center; gap: 12px;
+    z-index: 2000;
+    box-shadow: 0 10px 35px rgba(39,174,96,0.4);
+    max-width: 560px; margin: 0 auto;
+    animation: slideUp 0.4s ease;
+  }
+  .toast.show { display: flex; }
+  .toast.error {
+    background: linear-gradient(135deg, var(--red), var(--red-light));
+    box-shadow: 0 10px 35px rgba(192,57,43,0.4);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .toast-icon {
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 900; flex-shrink: 0;
+  }
+  .toast strong { display: block; font-size: 15px; }
+  .toast .sub { font-size: 13px; opacity: 0.9; }
+
+  @media (max-width: 420px) {
+    .grid { gap: 3px; padding: 14px 8px; }
+    .cell .num { font-size: 11px; }
+    .header h1 { font-size: 23px; }
+    .header { padding: 28px 16px 24px; }
+    .price-tag .value { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ╔═══════════════════════════════════════╗ -->
+<!-- ║  CONFIGURAÇÃO DO SUPABASE            ║ -->
+<!-- ║  Preencha as duas variáveis abaixo   ║ -->
+<!-- ╚═══════════════════════════════════════╝ -->
+
+<script>
+  // ▼▼▼ COLE AQUI A URL E A CHAVE DO SEU PROJETO SUPABASE ▼▼▼
+  const SUPABASE_URL  = 'https://lvgmabbdgnymrzqpqywy.supabase.co';       // ex: https://xyzabc.supabase.co
+  const SUPABASE_KEY  = 'sb_publishable_To5nNYzjSZUPJ47_yYzngw_g7J_fFaG';  // chave pública (anon)
+  // ▲▲▲ ─────────────────────────────────────────────────── ▲▲▲
+</script>
+
+<!-- Loading screen -->
+<div class="page" id="page" style="display:none;">
+
+  <div class="error-banner" id="error-banner"></div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">AÇÃO ENTRE AMIG@S</div>
+    <h1>Kit Chimarrão<br>e Mateira</h1>
+    <p class="subtitle">CSP-Conlutas RS</p>
+    <div class="price-tag">
+      <span class="label">Valor do número</span>
+      <span class="value">R$ 20</span>
+    </div>
+  </div>
+
+  <!-- Live indicator -->
+  <div class="live-bar">
+    <div class="live-dot" id="live-dot"></div>
+    <span id="live-text">Conectado — dados em tempo real</span>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-number" id="stat-available">101</span>
+      <span class="stat-label">Disponíveis</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number red" id="stat-taken">0</span>
+      <span class="stat-label">Escolhidos</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-number">101</span>
+      <span class="stat-label">Total</span>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-row">
+    <div class="progress-bg"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <span class="progress-text" id="progress-text">0% vendido</span>
+  </div>
+
+  <!-- Info -->
+  <div class="info-toggle">
+    <button id="info-btn" onclick="toggleInfo()">▼ Como participar</button>
+  </div>
+  <div class="info-box" id="info-box">
+    <div class="info-step"><span class="step-num">1</span> Escolha um número disponível (azul)</div>
+    <div class="info-step"><span class="step-num">2</span> Preencha seu nome e quem ofereceu</div>
+    <div class="info-step"><span class="step-num">3</span> Pague via PIX: <strong>cspconlutas.rs@gmail.com</strong></div>
+    <div class="info-step"><span class="step-num">4</span> Envie o comprovante para confirmar</div>
+    <div class="info-step"><span class="step-num">5</span> Aguarde o sorteio pela Loteria Federal</div>
+    <p class="info-note">Serão considerados os dois últimos números do 1º prêmio.</p>
+    <p class="info-contact">WhatsApp: (51) 92000-1595 — Alexandre (Guarda-Chuva)</p>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot av"></div><span class="legend-text">Disponível</span></div>
+    <div class="legend-item"><div class="legend-dot tk"></div><span class="legend-text">Escolhido</span></div>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid" id="grid"></div>
+
+  <!-- Admin -->
+  <div class="admin">
+    <button class="btn-log" id="btn-log" onclick="toggleLog()">Ver Registros (0)</button>
+    <button class="btn-download" onclick="downloadLog()">⬇ Baixar Log</button>
+    <button class="btn-reset" onclick="resetAll()">Resetar</button>
+  </div>
+
+  <!-- Log -->
+  <div class="log-container" id="log-container">
+    <h3>Registros de Escolhas</h3>
+    <div id="log-entries"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p class="f1">Sorteio pela Loteria Federal — Dois últimos números do 1º prêmio</p>
+    <p class="f2">WhatsApp: (51) 92000-1595 — Alexandre (Guarda-Chuva)</p>
+    <p class="f3">PIX: cspconlutas.rs@gmail.com</p>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="page" id="loading-page">
+  <div class="loading-screen">
+    <div class="spinner"></div>
+    <p>Carregando números...</p>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-header">
+      <div class="modal-big-num" id="modal-num">00</div>
+      <h2>Confirmar Escolha</h2>
+    </div>
+    <div class="modal-body">
+      <div class="input-group">
+        <label>Seu Nome *</label>
+        <input type="text" id="input-nome" placeholder="Digite seu nome completo">
+      </div>
+      <div class="input-group">
+        <label>Quem ofereceu o link? *</label>
+        <input type="text" id="input-ofereceu" placeholder="Nome de quem te indicou">
+      </div>
+      <p class="modal-note">
+        Após confirmar, efetue o pagamento de <strong>R$20</strong> via PIX para
+        <strong>cspconlutas.rs@gmail.com</strong> e envie o comprovante pelo WhatsApp.
+      </p>
+      <button class="confirm-btn" id="confirm-btn" onclick="confirmChoice()" disabled>
+        Confirmar Número
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toast-icon">✓</div>
+  <div>
+    <strong id="toast-title"></strong>
+    <span class="sub" id="toast-sub"></span>
+  </div>
+</div>
+
+<script>
+  // ── Supabase client ──
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ── State ──
+  const TOTAL = 101;
+  let taken = {};     // { numero: { nome, ofereceu, data } }
+  let logData = [];   // from log_escolhas table
+  let selectedNumber = null;
+  let logOpen = false;
+  let infoOpen = false;
+
+  // ── Init ──
+  async function init() {
+    try {
+      // Load all chosen numbers
+      const { data: escolhas, error: e1 } = await supabase
+        .from('escolhas')
+        .select('*');
+      if (e1) throw e1;
+
+      taken = {};
+      (escolhas || []).forEach(row => {
+        taken[row.numero] = {
+          nome: row.nome,
+          ofereceu: row.ofereceu,
+          data: new Date(row.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+        };
+      });
+
+      // Load log
+      const { data: logRows, error: e2 } = await supabase
+        .from('log_escolhas')
+        .select('*')
+        .order('created_at', { ascending: true });
+      if (e2) throw e2;
+
+      logData = (logRows || []).map(row => ({
+        timestamp: new Date(row.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+        nome: row.nome,
+        ofereceu: row.ofereceu,
+        numero: row.numero,
+        total_disponiveis: row.disponiveis,
+        numeros_livres: row.numeros_livres
+      }));
+
+      // Show page
+      document.getElementById('loading-page').style.display = 'none';
+      document.getElementById('page').style.display = 'block';
+
+      renderGrid();
+      updateStats();
+      subscribeRealtime();
+
+    } catch (err) {
+      console.error('Erro ao carregar:', err);
+      document.getElementById('loading-page').style.display = 'none';
+      document.getElementById('page').style.display = 'block';
+      showError('Erro ao conectar ao banco de dados. Verifique a configuração do Supabase.');
+    }
+  }
+
+  // ── Realtime subscription ──
+  function subscribeRealtime() {
+    supabase
+      .channel('escolhas-changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'escolhas' }, (payload) => {
+        const row = payload.new;
+        if (!taken[row.numero]) {
+          taken[row.numero] = {
+            nome: row.nome,
+            ofereceu: row.ofereceu,
+            data: new Date(row.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+          };
+          renderGrid(row.numero); // pass the just-taken number for animation
+          updateStats(true);
+        }
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'escolhas' }, () => {
+        // On reset, reload everything
+        location.reload();
+      })
+      .subscribe((status) => {
+        const dot = document.getElementById('live-dot');
+        const text = document.getElementById('live-text');
+        if (status === 'SUBSCRIBED') {
+          dot.classList.remove('offline');
+          text.textContent = 'Conectado — dados em tempo real';
+        } else {
+          dot.classList.add('offline');
+          text.textContent = 'Reconectando...';
+        }
+      });
+  }
+
+  // ── Render ──
+  function renderGrid(justTakenNum) {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    for (let i = 0; i <= 100; i++) {
+      const btn = document.createElement('button');
+      const isTaken = !!taken[i];
+      const isJust = (justTakenNum === i);
+      btn.className = 'cell ' + (isTaken ? 'taken' : 'available') + (isJust ? ' just-taken' : '');
+      btn.style.animationDelay = (i * 6) + 'ms';
+      btn.title = isTaken ? 'Escolhido por ' + taken[i].nome : 'Número ' + i + ' — Disponível (clique para escolher)';
+      btn.innerHTML = '<span class="num">' + String(i).padStart(2, '0') + '</span>' +
+        (isTaken ? '<span class="x-mark">✕</span>' : '');
+      if (!isTaken) btn.onclick = () => openModal(i);
+      grid.appendChild(btn);
+    }
+  }
+
+  function updateStats(animate) {
+    const takenCount = Object.keys(taken).length;
+    const available = TOTAL - takenCount;
+    const pct = Math.round((takenCount / TOTAL) * 100);
+
+    const elAvail = document.getElementById('stat-available');
+    const elTaken = document.getElementById('stat-taken');
+
+    elAvail.textContent = available;
+    elTaken.textContent = takenCount;
+
+    if (animate) {
+      elAvail.classList.remove('bump');
+      elTaken.classList.remove('bump');
+      void elAvail.offsetWidth; // reflow
+      elAvail.classList.add('bump');
+      elTaken.classList.add('bump');
+    }
+
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = pct + '% vendido';
+    document.getElementById('btn-log').textContent =
+      (logOpen ? 'Ocultar Registros' : 'Ver Registros') + ' (' + logData.length + ')';
+  }
+
+  function renderLog() {
+    const container = document.getElementById('log-entries');
+    if (logData.length === 0) {
+      container.innerHTML = '<p class="log-empty">Nenhum registro ainda.</p>';
+      return;
+    }
+    container.innerHTML = [...logData].reverse().map(log =>
+      '<div class="log-entry">' +
+        '<div class="log-header">' +
+          '<span class="log-num">Nº ' + String(log.numero).padStart(2, '0') + '</span>' +
+          '<span class="log-date">' + log.timestamp + '</span>' +
+        '</div>' +
+        '<div class="log-body">' +
+          '<span><strong>Nome:</strong> ' + escHTML(log.nome) + '</span>' +
+          '<span><strong>Ofereceu:</strong> ' + escHTML(log.ofereceu) + '</span>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+  }
+
+  function escHTML(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // ── Actions ──
+  function openModal(num) {
+    if (taken[num]) return;
+    selectedNumber = num;
+    document.getElementById('modal-num').textContent = String(num).padStart(2, '0');
+    document.getElementById('confirm-btn').textContent = 'Confirmar Número ' + String(num).padStart(2, '0');
+    document.getElementById('input-nome').value = '';
+    document.getElementById('input-ofereceu').value = '';
+    document.getElementById('confirm-btn').disabled = true;
+    document.getElementById('confirm-btn').classList.remove('loading');
+    document.getElementById('overlay').classList.add('open');
+    setTimeout(() => document.getElementById('input-nome').focus(), 250);
+  }
+
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('open');
+    selectedNumber = null;
+  }
+
+  function validateInputs() {
+    const nome = document.getElementById('input-nome').value.trim();
+    const ofereceu = document.getElementById('input-ofereceu').value.trim();
+    const btn = document.getElementById('confirm-btn');
+    btn.disabled = !(nome && ofereceu) || btn.classList.contains('loading');
+  }
+  document.addEventListener('input', validateInputs);
+
+  function getAvailableList() {
+    const arr = [];
+    for (let i = 0; i <= 100; i++) { if (!taken[i]) arr.push(i); }
+    return arr;
+  }
+
+  async function confirmChoice() {
+    const nome = document.getElementById('input-nome').value.trim();
+    const ofereceu = document.getElementById('input-ofereceu').value.trim();
+    if (!nome || !ofereceu || selectedNumber === null) return;
+
+    const btn = document.getElementById('confirm-btn');
+    btn.classList.add('loading');
+    btn.textContent = 'Salvando...';
+
+    const numero = selectedNumber;
+    const availList = getAvailableList();
+
+    try {
+      // Insert into escolhas (will fail if duplicate due to PRIMARY KEY)
+      const { error: e1 } = await supabase
+        .from('escolhas')
+        .insert({ numero, nome, ofereceu });
+
+      if (e1) {
+        if (e1.code === '23505') {
+          // Duplicate — someone else grabbed it
+          taken[numero] = { nome: '(outro)', ofereceu: '', data: '' };
+          renderGrid();
+          updateStats();
+          closeModal();
+          showToast('Número ' + String(numero).padStart(2, '0') + ' já foi escolhido!', 'Alguém pegou antes. Tente outro número.', true);
+          return;
+        }
+        throw e1;
+      }
+
+      // Insert into log
+      await supabase.from('log_escolhas').insert({
+        numero,
+        nome,
+        ofereceu,
+        disponiveis: availList.length,
+        numeros_livres: availList.join(', ')
+      });
+
+      // Update local state
+      const now = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+      taken[numero] = { nome, ofereceu, data: now };
+      logData.push({
+        timestamp: now,
+        nome, ofereceu, numero,
+        total_disponiveis: availList.length,
+        numeros_livres: availList.join(', ')
+      });
+
+      closeModal();
+      renderGrid(numero);
+      updateStats(true);
+
+      showToast(
+        'Número ' + String(numero).padStart(2, '0') + ' reservado!',
+        'Efetue o pagamento via PIX e envie o comprovante. Boa sorte, ' + nome + '!'
+      );
+
+    } catch (err) {
+      console.error('Erro ao salvar:', err);
+      btn.classList.remove('loading');
+      btn.textContent = 'Confirmar Número ' + String(numero).padStart(2, '0');
+      showToast('Erro ao salvar', 'Tente novamente. Se o problema persistir, entre em contato.', true);
+    }
+  }
+
+  function toggleInfo() {
+    infoOpen = !infoOpen;
+    document.getElementById('info-box').classList.toggle('open', infoOpen);
+    document.getElementById('info-btn').textContent =
+      (infoOpen ? '▲ Ocultar informações' : '▼ Como participar');
+  }
+
+  function toggleLog() {
+    logOpen = !logOpen;
+    document.getElementById('log-container').classList.toggle('open', logOpen);
+    updateStats();
+    if (logOpen) renderLog();
+  }
+
+  function downloadLog() {
+    let txt = '═══════════════════════════════════════════════════\n';
+    txt += '   AÇÃO ENTRE AMIG@S - CSP-Conlutas\n';
+    txt += '   Kit Chimarrão e Mateira - R$20/número\n';
+    txt += '═══════════════════════════════════════════════════\n\n';
+
+    logData.forEach((log, i) => {
+      txt += '── Registro #' + (i + 1) + ' ──────────────────────────\n';
+      txt += 'Data/Hora: ' + log.timestamp + '\n';
+      txt += 'Nome: ' + log.nome + '\n';
+      txt += 'Quem ofereceu: ' + log.ofereceu + '\n';
+      txt += 'Número escolhido: ' + log.numero + '\n';
+      txt += 'Números disponíveis no momento: ' + log.numeros_livres + '\n';
+      txt += 'Total disponíveis: ' + log.total_disponiveis + '\n\n';
+    });
+
+    txt += '═══════════════════════════════════════════════════\n';
+    txt += 'Total de números vendidos: ' + Object.keys(taken).length + '\n';
+    txt += 'Total disponíveis agora: ' + getAvailableList().length + '\n';
+    txt += '═══════════════════════════════════════════════════\n';
+
+    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'log-acao-amigos-' + new Date().toISOString().slice(0, 10) + '.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function resetAll() {
+    const senha = prompt('Para resetar, digite a senha de administrador:');
+    if (senha !== 'cspconlutas2026') {
+      if (senha !== null) alert('Senha incorreta.');
+      return;
+    }
+    if (!confirm('ATENÇÃO: Isso vai apagar TODOS os números escolhidos.\nEsta ação NÃO pode ser desfeita.\n\nConfirmar reset?')) return;
+
+    try {
+      await supabase.from('log_escolhas').delete().gte('id', 0);
+      await supabase.from('escolhas').delete().gte('numero', 0);
+      taken = {};
+      logData = [];
+      renderGrid();
+      updateStats();
+      renderLog();
+      logOpen = false;
+      document.getElementById('log-container').classList.remove('open');
+      showToast('Dados resetados', 'Todos os números estão disponíveis novamente.');
+    } catch (err) {
+      console.error('Erro ao resetar:', err);
+      showToast('Erro ao resetar', 'Tente novamente.', true);
+    }
+  }
+
+  // ── Helpers ──
+  function showError(msg) {
+    const el = document.getElementById('error-banner');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  let toastTimer;
+  function showToast(title, sub, isError) {
+    clearTimeout(toastTimer);
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-title').textContent = title;
+    document.getElementById('toast-sub').textContent = sub;
+    document.getElementById('toast-icon').textContent = isError ? '✕' : '✓';
+    toast.classList.remove('show', 'error');
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    if (isError) toast.classList.add('error');
+    toastTimer = setTimeout(() => toast.classList.remove('show', 'error'), 4500);
+  }
+
+  // ── Start ──
+  init();
+</script>
+
+</body>
+</html>
