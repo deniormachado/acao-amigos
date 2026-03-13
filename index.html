@@ -266,9 +266,17 @@
     transition: filter 0.15s;
   }
   .admin button:hover { filter: brightness(1.1); }
+  .btn-admin {
+    background: var(--dark);
+    flex: 0 0 auto;
+    min-width: 60px;
+    font-size: 14px;
+  }
   .btn-log { background: var(--dark); }
   .btn-download { background: var(--green); }
   .btn-reset { background: var(--red); flex: 0; min-width: 100px; }
+  /* Botões administrativos inicialmente ocultos */
+  #btn-log, #btn-reset { display: none; }
   .log-container {
     max-height: 0; overflow: hidden;
     transition: max-height 0.4s ease;
@@ -424,7 +432,7 @@
   </div>
   <div class="stats-bar">
     <div class="stat-item">
-      <span class="stat-number" id="stat-available">101</span>
+      <span class="stat-number" id="stat-available">100</span>
       <span class="stat-label">Disponiveis</span>
     </div>
     <div class="stat-divider"></div>
@@ -434,7 +442,7 @@
     </div>
     <div class="stat-divider"></div>
     <div class="stat-item">
-      <span class="stat-number">101</span>
+      <span class="stat-number" id="stat-total">100</span>
       <span class="stat-label">Total</span>
     </div>
   </div>
@@ -460,9 +468,10 @@
   </div>
   <div class="grid" id="grid"></div>
   <div class="admin">
+    <button class="btn-admin" id="btn-admin" onclick="toggleAdmin()">🔒 Admin</button>
     <button class="btn-log" id="btn-log" onclick="toggleLog()">Ver Registros (0)</button>
     <button class="btn-download" onclick="downloadLog()">Baixar Log</button>
-    <button class="btn-reset" onclick="resetAll()">Resetar</button>
+    <button class="btn-reset" id="btn-reset" onclick="resetAll()">Resetar</button>
   </div>
   <div class="log-container" id="log-container">
     <h3>Registros de Escolhas</h3>
@@ -533,12 +542,13 @@
   var db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // Estado
-  var TOTAL = 101;
+  var TOTAL = 100; // Agora de 0 a 99 (100 números)
   var taken = {};
   var logData = [];
   var selectedNumber = null;
   var logOpen = false;
   var infoOpen = false;
+  var adminVisible = false; // controle dos botões administrativos
 
   function escHTML(s) {
     var d = document.createElement('div');
@@ -548,7 +558,7 @@
 
   function getAvailableList() {
     var arr = [];
-    for (var i = 0; i <= 100; i++) { if (!taken[i]) arr.push(i); }
+    for (var i = 0; i < TOTAL; i++) { if (!taken[i]) arr.push(i); }
     return arr;
   }
 
@@ -628,7 +638,7 @@
   function renderGrid(justTakenNum) {
     var grid = document.getElementById('grid');
     grid.innerHTML = '';
-    for (var i = 0; i <= 100; i++) {
+    for (var i = 0; i < TOTAL; i++) {
       var btn = document.createElement('button');
       var isTaken = !!taken[i];
       var isJust = (justTakenNum === i);
@@ -650,8 +660,10 @@
     var pct = Math.round((takenCount / TOTAL) * 100);
     var elAvail = document.getElementById('stat-available');
     var elTaken = document.getElementById('stat-taken');
+    var elTotal = document.getElementById('stat-total');
     elAvail.textContent = available;
     elTaken.textContent = takenCount;
+    elTotal.textContent = TOTAL; // garantia
     if (animate) {
       elAvail.classList.remove('bump');
       elTaken.classList.remove('bump');
@@ -806,7 +818,10 @@
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'log-acao-amigos-' + new Date().toISOString().slice(0, 10) + '.txt';
+    // Nome do arquivo com data, hora, minuto e segundo
+    var now = new Date();
+    var iso = now.toISOString().replace(/[:.]/g, '-').substring(0, 19); // 2025-03-13T15-30-45
+    a.download = 'log-acao-amigos-' + iso + '.txt';
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -854,6 +869,24 @@
     toast.classList.add('show');
     if (isError) toast.classList.add('error');
     toastTimer = setTimeout(function() { toast.classList.remove('show', 'error'); }, 4500);
+  }
+
+  // Função para alternar visibilidade dos botões administrativos
+  function toggleAdmin() {
+    var senha = prompt('Digite a senha de admin:');
+    if (senha === '9871') {
+      adminVisible = !adminVisible;
+      var btnLog = document.getElementById('btn-log');
+      var btnReset = document.getElementById('btn-reset');
+      btnLog.style.display = adminVisible ? 'block' : 'none';
+      btnReset.style.display = adminVisible ? 'block' : 'none';
+      if (!adminVisible && logOpen) {
+        // Se ocultar os botões, também fecha o log se estiver aberto?
+        // Deixamos como está, mas podemos opcionalmente fechar.
+      }
+    } else if (senha !== null) {
+      alert('Senha incorreta.');
+    }
   }
 
   // Iniciar
