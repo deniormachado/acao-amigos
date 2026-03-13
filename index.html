@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- EmailJS (para envio de e-mails) -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   :root {
     --red: #c0392b;
@@ -256,9 +258,10 @@
     display: flex; gap: 8px; padding: 16px;
     background: #fff; border-top: 1px solid #eee;
     flex-wrap: wrap;
+    align-items: center;
   }
   .admin button {
-    flex: 1; padding: 11px 14px;
+    padding: 11px 14px;
     color: #fff; border: none; border-radius: 10px;
     font-weight: 700; font-size: 13px;
     cursor: pointer; font-family: inherit;
@@ -269,14 +272,21 @@
   .btn-admin {
     background: var(--dark);
     flex: 0 0 auto;
-    min-width: 60px;
-    font-size: 14px;
+    min-width: auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    font-size: 20px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .btn-log { background: var(--dark); }
   .btn-download { background: var(--green); }
   .btn-reset { background: var(--red); flex: 0; min-width: 100px; }
   /* Botões administrativos inicialmente ocultos */
-  #btn-log, #btn-reset { display: none; }
+  #btn-log, #btn-reset, #btn-download { display: none; }
   .log-container {
     max-height: 0; overflow: hidden;
     transition: max-height 0.4s ease;
@@ -468,9 +478,9 @@
   </div>
   <div class="grid" id="grid"></div>
   <div class="admin">
-    <button class="btn-admin" id="btn-admin" onclick="toggleAdmin()">🔒 Admin</button>
+    <button class="btn-admin" id="btn-admin" onclick="toggleAdmin()">🔒</button>
     <button class="btn-log" id="btn-log" onclick="toggleLog()">Ver Registros (0)</button>
-    <button class="btn-download" onclick="downloadLog()">Baixar Log</button>
+    <button class="btn-download" id="btn-download" onclick="downloadLog()">Baixar Log</button>
     <button class="btn-reset" id="btn-reset" onclick="resetAll()">Resetar</button>
   </div>
   <div class="log-container" id="log-container">
@@ -529,6 +539,16 @@
   // Configuracao Supabase
   var SUPABASE_URL = 'https://lvgmabbdgnymrzqpqywy.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2Z21hYmJkZ255bXJ6cXBxeXd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjUzMzMsImV4cCI6MjA4ODk0MTMzM30.t5EjBugUEErc4cbLRVuwqBnt6JbZ_ow8t2ARWVbTcWQ';
+
+  // Configuração do EmailJS (substitua pelas suas credenciais)
+  // Cadastre-se em https://www.emailjs.com/ e crie um serviço e templates
+  var EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY'; // Substitua
+  var EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID'; // Substitua
+  var EMAILJS_TEMPLATE_LOG = 'YOUR_TEMPLATE_ID_FOR_LOG'; // Template para o log
+  var EMAILJS_TEMPLATE_REGISTROS = 'YOUR_TEMPLATE_ID_FOR_REGISTROS'; // Template para os registros
+
+  // Inicializa o EmailJS
+  emailjs.init(EMAILJS_PUBLIC_KEY);
 
   // Email PIX (montado via JS para evitar filtros)
   var PIX_EMAIL = 'cspconlutas.rs' + '@' + 'gmail.com';
@@ -724,6 +744,60 @@
   }
   document.addEventListener('input', validateInputs);
 
+  // Função para gerar o conteúdo do log (mesmo formato do download)
+  function gerarConteudoLog(novoRegistro = null) {
+    var txt = '===================================================\n';
+    txt += '   ACAO ENTRE AMIGOS - CSP-Conlutas\n';
+    txt += '   Kit Chimarrao e Mateira - R$20/numero\n';
+    txt += '===================================================\n\n';
+    logData.forEach(function(log, i) {
+      txt += '-- Registro #' + (i + 1) + ' --------------------------\n';
+      txt += 'Data/Hora: ' + log.timestamp + '\n';
+      txt += 'Nome: ' + log.nome + '\n';
+      txt += 'Quem ofereceu: ' + log.ofereceu + '\n';
+      txt += 'Numero escolhido: ' + log.numero + '\n';
+      txt += 'Numeros disponiveis no momento: ' + log.numeros_livres + '\n';
+      txt += 'Total disponiveis: ' + log.total_disponiveis + '\n\n';
+    });
+    txt += '===================================================\n';
+    txt += 'Total de numeros vendidos: ' + Object.keys(taken).length + '\n';
+    txt += 'Total disponiveis agora: ' + getAvailableList().length + '\n';
+    txt += '===================================================\n';
+    return txt;
+  }
+
+  // Função para enviar e-mails via EmailJS
+  async function enviarEmails(novoRegistro) {
+    // Para denior.machado@gmail.com: enviar o log completo
+    var conteudoLog = gerarConteudoLog(novoRegistro);
+    var templateParamsLog = {
+      to_email: 'denior.machado@gmail.com',
+      subject: 'Nova escolha na rifa - Log atualizado',
+      message: conteudoLog
+    };
+
+    // Para joaoaugusto16@uol.com.br: enviar o conteúdo de "ver registros" (lista de escolhas)
+    var registrosHtml = logData.map(function(log) {
+      return `Nº ${String(log.numero).padStart(2, '0')} - ${log.nome} (indicou: ${log.ofereceu}) em ${log.timestamp}`;
+    }).join('\n');
+    var templateParamsReg = {
+      to_email: 'joaoaugusto16@uol.com.br',
+      subject: 'Registro de escolhas atualizado',
+      message: registrosHtml || 'Nenhum registro ainda.'
+    };
+
+    try {
+      // Envia para denior
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_LOG, templateParamsLog);
+      // Envia para joao
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_REGISTROS, templateParamsReg);
+      console.log('E-mails enviados com sucesso');
+    } catch (error) {
+      console.error('Erro ao enviar e-mails:', error);
+      // Não interrompe o fluxo principal
+    }
+  }
+
   async function confirmChoice() {
     var nome = document.getElementById('input-nome').value.trim();
     var ofereceu = document.getElementById('input-ofereceu').value.trim();
@@ -761,12 +835,16 @@
 
       var now = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
       taken[numero] = { nome: nome, ofereceu: ofereceu, data: now };
-      logData.push({
+      var novoRegistro = {
         timestamp: now,
         nome: nome, ofereceu: ofereceu, numero: numero,
         total_disponiveis: availList.length,
         numeros_livres: availList.join(', ')
-      });
+      };
+      logData.push(novoRegistro);
+
+      // Envia e-mails automáticos
+      enviarEmails(novoRegistro);
 
       closeModal();
       renderGrid(numero);
@@ -796,24 +874,7 @@
   }
 
   function downloadLog() {
-    var txt = '===================================================\n';
-    txt += '   ACAO ENTRE AMIGOS - CSP-Conlutas\n';
-    txt += '   Kit Chimarrao e Mateira - R$20/numero\n';
-    txt += '===================================================\n\n';
-    logData.forEach(function(log, i) {
-      txt += '-- Registro #' + (i + 1) + ' --------------------------\n';
-      txt += 'Data/Hora: ' + log.timestamp + '\n';
-      txt += 'Nome: ' + log.nome + '\n';
-      txt += 'Quem ofereceu: ' + log.ofereceu + '\n';
-      txt += 'Numero escolhido: ' + log.numero + '\n';
-      txt += 'Numeros disponiveis no momento: ' + log.numeros_livres + '\n';
-      txt += 'Total disponiveis: ' + log.total_disponiveis + '\n\n';
-    });
-    txt += '===================================================\n';
-    txt += 'Total de numeros vendidos: ' + Object.keys(taken).length + '\n';
-    txt += 'Total disponiveis agora: ' + getAvailableList().length + '\n';
-    txt += '===================================================\n';
-
+    var txt = gerarConteudoLog();
     var blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
@@ -878,11 +939,13 @@
       adminVisible = !adminVisible;
       var btnLog = document.getElementById('btn-log');
       var btnReset = document.getElementById('btn-reset');
+      var btnDownload = document.getElementById('btn-download');
       btnLog.style.display = adminVisible ? 'block' : 'none';
       btnReset.style.display = adminVisible ? 'block' : 'none';
+      btnDownload.style.display = adminVisible ? 'block' : 'none';
       if (!adminVisible && logOpen) {
-        // Se ocultar os botões, também fecha o log se estiver aberto?
-        // Deixamos como está, mas podemos opcionalmente fechar.
+        // Opcional: fechar o log se estiver aberto
+        // toggleLog(); // descomente se quiser fechar automaticamente
       }
     } else if (senha !== null) {
       alert('Senha incorreta.');
