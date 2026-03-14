@@ -201,7 +201,7 @@
     background: var(--red); color: #fff;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700; flex-shrink: 0;
+    font-size: 16px; font-weight: 900; flex-shrink: 0;
   }
   .info-note { font-size: 13px; color: var(--red); font-weight: 700; margin-top: 14px; }
   .info-contact { font-size: 13px; color: #666; margin-top: 4px; }
@@ -478,10 +478,10 @@
     <button id="info-btn" onclick="toggleInfo()">Como participar</button>
   </div>
   <div class="info-box" id="info-box">
-    <div class="info-step"><span class="step-num">*</span> Escolha um numero disponivel (azul)</div>
-    <div class="info-step"><span class="step-num">*</span> Preencha seu nome e quem ofereceu</div>
-    <div class="info-step"><span class="step-num">*</span> Use a chave copia e cola que vai estar na area de transferencia no app do seu banco.</div>
-    <div class="info-step"><span class="step-num">*</span> Aguarde o sorteio pela Loteria Federal</div>
+    <div class="info-step"><span class="step-num">•</span> Escolha um numero disponivel (azul)</div>
+    <div class="info-step"><span class="step-num">•</span> Preencha seu nome e quem ofereceu</div>
+    <div class="info-step"><span class="step-num">•</span> Use a chave copia e cola que vai estar na area de transferencia no app do seu banco.</div>
+    <div class="info-step"><span class="step-num">•</span> Aguarde o sorteio pela Loteria Federal</div>
     <p class="info-note">Serao considerados os dois ultimos numeros do 10 premio.</p>
     <p class="info-contact">WhatsApp: (51) 92000-1595 - Alexandre (Guarda-chuva)</p>
   </div>
@@ -587,13 +587,33 @@
   // Gera a linha digitável do PIX com o número escolhido na observação
   function gerarPixCopiaECola(numero) {
     let numStr = String(numero).padStart(2, '0');
-    let txid = "AcaoEntreAmigos" + numStr; // O identificador ficará ex: AcaoEntreAmigos05
+    
+    // 1. Merchant Account Information (ID 26) - Injetando a Descrição para o app do Banco
+    let gui = "0014BR.GOV.BCB.PIX";
+    let chave = "0124cspconlutas.rs@gmail.com";
+    let mensagem = "Numero " + numStr; // O que vai aparecer na tela do banco: "Numero 05"
+    let desc = "02" + String(mensagem.length).padStart(2, '0') + mensagem;
+    let field26_inner = gui + chave + desc;
+    let field26 = "26" + String(field26_inner.length).padStart(2, '0') + field26_inner;
+
+    // 2. Additional Data Field (ID 62) - TxId (Referência)
+    let txid = "Rifa" + numStr; 
     let field62_inner = "05" + String(txid.length).padStart(2, '0') + txid;
     let field62 = "62" + String(field62_inner.length).padStart(2, '0') + field62_inner;
     
-    // Base do Pix (valor R$20 fixo e chave de email embutida secretamente)
-    let base = "00020126460014BR.GOV.BCB.PIX0124cspconlutas.rs@gmail.com520400005303986540520.005802BR5901N6001C";
-    let payload = base + field62 + "6304";
+    // 3. Montagem do payload completo do PIX (R$ 20.00 fixo)
+    let payload = 
+      "000201" +       // Payload Format Indicator
+      field26 +        // Informações da conta (Chave + Mensagem/Descrição)
+      "52040000" +     // Merchant Category Code
+      "5303986" +      // Moeda (BRL)
+      "540520.00" +    // Valor (R$ 20,00)
+      "5802BR" +       // País
+      "5901N" +        // Nome Recebedor (ocultado pelo padrão N)
+      "6001C" +        // Cidade
+      field62 +        // Identificador da Transação (TxId)
+      "6304";          // Prefixo do CRC16
+
     return payload + crc16Pix(payload);
   }
 
