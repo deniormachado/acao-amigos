@@ -278,6 +278,7 @@
     transition: filter 0.15s;
   }
   .admin button:hover { filter: brightness(1.1); }
+  
   .btn-admin {
     background: #e0e0e0;
     color: #999;
@@ -296,6 +297,7 @@
     border: 1px solid #ccc;
   }
   .btn-admin:hover { opacity: 0.8; }
+
   .btn-log { background: var(--dark); }
   .btn-download { background: var(--green); }
   .btn-reset { background: var(--red); flex: 0; min-width: 100px; }
@@ -515,7 +517,7 @@
   </div>
   <div class="grid" id="grid"></div>
   <div class="admin">
-    <button class="btn-admin" id="btn-admin" onclick="toggleAdmin()">&#9881;</button>
+    <button class="btn-admin" id="btn-admin" onclick="toggleAdmin()">🔒</button>
     <button class="btn-log" id="btn-log" onclick="toggleLog()">Ver Registros (0)</button>
     <button class="btn-download" id="btn-download" onclick="downloadLog()">Baixar Log</button>
     <button class="btn-reset" id="btn-reset" onclick="resetAll()">Resetar</button>
@@ -1047,6 +1049,7 @@
     URL.revokeObjectURL(url);
   }
 
+  // --- FUNÇÃO RESET CORRIGIDA ---
   async function resetAll() {
     var senha = prompt('Para resetar, digite a senha de administrador:');
     if (senha !== '8965') {
@@ -1056,8 +1059,13 @@
     if (!confirm('ATENCAO: Isso vai apagar TODOS os numeros escolhidos.\nEsta acao NAO pode ser desfeita.\n\nConfirmar reset?')) return;
 
     try {
-      await db.from('log_escolhas').delete().gte('id', 0);
-      await db.from('escolhas').delete().gte('numero', 0);
+      // Usando gte('numero', 0) força o Supabase a deletar todas as linhas válidas
+      var rLog = await db.from('log_escolhas').delete().gte('numero', 0);
+      if (rLog.error) throw rLog.error;
+
+      var rEsc = await db.from('escolhas').delete().gte('numero', 0);
+      if (rEsc.error) throw rEsc.error;
+
       taken = {};
       logData = [];
       renderGrid();
@@ -1067,8 +1075,8 @@
       document.getElementById('log-container').classList.remove('open');
       showToast('Dados resetados', 'Todos os numeros estao disponiveis novamente.');
     } catch (err) {
-      console.error('Erro ao resetar:', err);
-      showToast('Erro ao resetar', 'Tente novamente.', true);
+      console.error('Erro ao resetar no banco:', err);
+      showToast('Erro ao resetar', 'Verifique se a Policy de DELETE esta ativa no Supabase.', true);
     }
   }
 
