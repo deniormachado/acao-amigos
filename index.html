@@ -325,6 +325,8 @@
   .footer p { margin: 0 0 6px; }
   .footer .f1 { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; }
   .footer .f2 { color: var(--yellow); font-size: 14px; font-weight: 700; }
+  
+  /* Overlays e Modais */
   .overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.55);
@@ -341,8 +343,8 @@
     animation: modalIn 0.3s ease;
   }
   @keyframes modalIn {
-    from { transform: transform scale(0.88) translateY(20px); opacity: 0; }
-    to { transform: transform scale(1) translateY(0); opacity: 1; }
+    from { transform: scale(0.88) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
   }
   .modal-close {
     position: absolute; top: 12px; right: 12px;
@@ -357,6 +359,9 @@
     background: linear-gradient(150deg, var(--red), var(--red-light));
     padding: 28px 20px; text-align: center;
   }
+  .modal-header.success {
+    background: linear-gradient(150deg, var(--green), var(--green-light));
+  }
   .modal-big-num {
     font-size: 52px; font-weight: 800;
     font-family: 'Baloo 2', cursive;
@@ -365,7 +370,7 @@
     line-height: 1; margin-bottom: 4px;
   }
   .modal-header h2 { color: #fff; font-size: 18px; font-weight: 700; }
-  .modal-body { padding: 24px; }
+  .modal-body { padding: 24px; text-align: left; }
   .input-group { margin-bottom: 18px; }
   .input-group label { display: block; font-size: 13px; font-weight: 700; color: #444; margin-bottom: 6px; }
   .input-group input {
@@ -397,6 +402,25 @@
   .confirm-btn:hover:not(:disabled) { filter: brightness(1.05); }
   .confirm-btn:disabled { opacity: 0.45; cursor: not-allowed; }
   .confirm-btn.loading { pointer-events: none; opacity: 0.6; }
+
+  /* Elementos do Modal de Cópia PIX */
+  .pix-copy-box {
+    display: flex; gap: 8px; margin-top: 15px; margin-bottom: 20px;
+  }
+  .pix-copy-input {
+    flex: 1; padding: 12px;
+    border: 2px solid #e8e8e8; border-radius: 10px;
+    font-size: 12px; outline: none; color: #666;
+    background: #f4f4f4; font-family: monospace;
+  }
+  .pix-copy-btn {
+    background: var(--blue); color: #fff;
+    border: none; border-radius: 10px;
+    padding: 0 16px; font-weight: 700; cursor: pointer;
+    font-size: 14px; transition: background 0.2s;
+  }
+  .pix-copy-btn:hover { background: var(--blue-light); }
+
   .toast {
     position: fixed; bottom: 24px; left: 20px; right: 20px;
     background: linear-gradient(135deg, var(--green), var(--green-light));
@@ -513,6 +537,7 @@
   </div>
 </div>
 
+<!-- Modal 1: Preencher Nome e Ofereceu -->
 <div class="overlay" id="overlay" onclick="closeModal()">
   <div class="modal" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModal()">X</button>
@@ -530,12 +555,39 @@
         <input type="text" id="input-ofereceu" placeholder="Nome de quem te indicou">
       </div>
       <p class="modal-note">
-        Apos confirmar, o codigo <strong>PIX Copia e Cola</strong> sera copiado para o seu celular. Cole no app do seu banco para pagar R$20.<br><br>
+        Apos confirmar, o codigo <strong>PIX Copia e Cola</strong> sera gerado para voce pagar R$20.<br><br>
         <strong style="font-size:14px; color: var(--red);">Reserva de numero - so confirmada apos pagamento.</strong>
       </p>
       <button class="confirm-btn" id="confirm-btn" onclick="confirmChoice()" disabled>
         Confirmar Numero
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 2: Mostrar e Copiar o PIX -->
+<div class="overlay" id="pix-overlay" onclick="closePixModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closePixModal()">X</button>
+    <div class="modal-header success">
+      <h2>🎉 Reserva Salva!</h2>
+    </div>
+    <div class="modal-body" style="text-align: center;">
+      <p style="font-size: 16px; font-weight: 700; color: #333; margin-bottom: 8px;">
+        Numero <strong id="pix-modal-num" style="color: var(--blue); font-size: 22px;">00</strong> reservado.
+      </p>
+      <p style="font-size: 15px; color: #444; margin-bottom: 10px;">
+        <strong>Cole no app do banco em Copia/Cola para pagar R$20.</strong>
+      </p>
+      
+      <div class="pix-copy-box">
+        <input type="text" id="pix-code-input" class="pix-copy-input" readonly>
+        <button class="pix-copy-btn" onclick="manualCopyPix()">Copiar</button>
+      </div>
+
+      <p class="modal-note" style="margin-bottom: 0;">
+        (O código já foi copiado para sua área de transferência automaticamente)
+      </p>
     </div>
   </div>
 </div>
@@ -617,7 +669,7 @@
     return payload + crc16Pix(payload);
   }
 
-  // Copia o código para o celular/computador do usuário
+  // Cópia silenciosa via código
   async function copyToClipboard(text) {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);
@@ -632,6 +684,34 @@
       try { document.execCommand('copy'); } catch (err) {}
       document.body.removeChild(textArea);
     }
+  }
+
+  // Cópia manual (ao clicar no botão dentro do modal do PIX)
+  function manualCopyPix() {
+    var copyText = document.getElementById("pix-code-input");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // Para mobile
+    
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(copyText.value).then(() => {
+        showToast('Copiado!', 'Código PIX copiado para a área de transferência.');
+      }).catch(err => {
+        try { document.execCommand("copy"); showToast('Copiado!', 'Código copiado com sucesso.'); } catch(e){}
+      });
+    } else {
+      try { document.execCommand("copy"); showToast('Copiado!', 'Código copiado com sucesso.'); } catch(e){}
+    }
+  }
+
+  // Controle do novo Modal PIX
+  function openPixModal(pixCode, num) {
+    document.getElementById('pix-modal-num').textContent = String(num).padStart(2, '0');
+    document.getElementById('pix-code-input').value = pixCode;
+    document.getElementById('pix-overlay').classList.add('open');
+  }
+
+  function closePixModal() {
+    document.getElementById('pix-overlay').classList.remove('open');
   }
 
   function escHTML(s) {
@@ -913,21 +993,25 @@
       // Envia e-mails automáticos
       enviarEmails(novoRegistro);
 
+      // Fecha o modal de formulário
       closeModal();
+      
+      // Atualiza painel e grid
       renderGrid(numero);
       updateStats(true);
       
-      // GERA PIX E COPIA AUTOMATICAMENTE
+      // GERA O PIX
       let pixCode = gerarPixCopiaECola(numero);
+      
+      // Cópia Automática Silenciosa
       try {
         await copyToClipboard(pixCode);
-        showToast('Numero ' + String(numero).padStart(2, '0') + ' reservado!',
-          '✅ CÓDIGO PIX COPIADO! Cole no seu app de banco, pague R$20.');
-      } catch (err) {
-        // Fallback caso o navegador por segurança bloqueie a cópia
-        showToast('Numero ' + String(numero).padStart(2, '0') + ' reservado!',
-          '✅ Reserva salva! Efetue o pagamento de R$20.');
+      } catch(err) {
+        // Se falhar silenciosamente por proteção de browser, o usuário ainda tem o botão manual.
       }
+
+      // ABRE A NOVA JANELA COM O CÓDIGO E O BOTÃO COPIAR
+      openPixModal(pixCode, numero);
 
     } catch (err) {
       console.error('Erro ao salvar:', err);
